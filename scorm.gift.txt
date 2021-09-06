@@ -1,0 +1,22 @@
+// https://docs.moodle.org/en/GIFT_format
+
+This is a true assertion. {T}
+
+// No order question type in GIFT; matching can be used instead.
+What is the order? {
+  =This is first -> 1st
+  =This is second -> 2nd
+  =this is third -> 3rd
+}
+
+Match the options below: {
+  =This is the definition of the first item. -> First Item
+  =This corresponds to the second item. -> Second Item
+  =This defines the third item. -> Third Item
+}
+
+What is the good answer? {
+  =This is the good answer.
+  ~This is a wrong answer.
+  ~This answer isn't the right one.
+}

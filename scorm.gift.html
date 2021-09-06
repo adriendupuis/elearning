@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+<head></head>
+<body>
+<div id="gift-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-ui@1.12.1/ui/widget.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/pipwerks/scorm-api-wrapper@master/src/JavaScript/SCORM_API_wrapper.js"></script>
+<script src="./array.shuffle.js"></script>
+<script src="./scorm.gift.js"></script>
+<script>
+    new Gift('./scorm.gift.txt', '#gift-container', {debug: true});
+    //new Gift('./scorm.gift.encoded.txt', '#gift-container', {timer: 3600, randomize: true, subset: 1});
+</script>
+</body>
+</html>

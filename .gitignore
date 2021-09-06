@@ -1,3 +1,4 @@
 scorm.package.tmp/
 scorm.package.template.tmp.zip
 *.zip
+*.encoded.*
