@@ -49,7 +49,8 @@ if (pipwerks.SCORM.init()) {
             ScormUtils.complete();
         } else {
             ScormUtils.multipleSetAndSave({
-                'cmi.suspend_data': RevealUtils.getSeenSlides()
+                'cmi.suspend_data': RevealUtils.getSeenSlides(),
+                'cmi.core.session_time': ScormUtils.getCmiTimespan(new Date().getTime() - ScormUtils.startTime.getTime())
             });
         }
     });
