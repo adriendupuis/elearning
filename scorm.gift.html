@@ -1,16 +1,62 @@
 <!doctype html>
 <html>
-<head></head>
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/dist/reveal.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/dist/theme/white.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/plugin/highlight/monokai.css" rel="stylesheet">
+    <style>
+        .timer {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 32;
+            font: 12px Helvetica, sans-serif;
+            color: #fff;
+            background-color: rgba(0, 0, 0, .4);
+            padding: 5px;
+        }
+    </style>
+</head>
 <body>
-<div id="gift-container"></div>
+<div class="timer" style="display: none;">00:00</div>
+<div class="reveal">
+    <div class="slides">
+        <section data-charset="utf-8"
+                 data-markdown="scorm.gift.md"
+                 data-separator="^\n---\n$"
+                 data-separator-vertical="^\n--\n$">
+        </section>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/plugin/highlight/highlight.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery-ui@1.12.1/ui/widget.min.js"></script>
+
 <script src="https://cdn.jsdelivr.net/gh/pipwerks/scorm-api-wrapper@master/src/JavaScript/SCORM_API_wrapper.js"></script>
+
 <script src="./array.shuffle.js"></script>
+<script src="./utils.scorm.js"></script>
 <script src="./scorm.gift.js"></script>
+
 <script>
-    new Gift('./scorm.gift.txt', '#gift-container', {debug: true});
-    //new Gift('./scorm.gift.encoded.txt', '#gift-container', {timer: 3600, randomize: true, subset: 1});
+    Reveal.initialize({
+        overview: false,
+        center: false,
+        hideInactiveCursor: false,
+        width: '100%',
+        height: '100%',
+        margin: 0,
+        plugins: [RevealMarkdown/*, RevealHighlight*/]
+    });
+
+    let gift = new Gift('./scorm.gift.txt', {debug: true, testTime: 120});
+    //new Gift('./scorm.gift.encoded.txt', {testTime: 3600, randomize: true, subset: 45, score: '67%'});
+
+    Reveal.configure({slideNumber: gift.slideNumber.bind(gift)});
 </script>
 </body>
 </html>

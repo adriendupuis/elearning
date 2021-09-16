@@ -2,19 +2,32 @@
 // - https://docs.moodle.org/en/GIFT_format
 
 class Gift {
-    constructor(url, container = '#gift-container', options = {}) {
-        this.container = $(container);
+    constructor(url, options = {}) {
         this.options = Object.assign({
             debug: false,
             subset: null,
             randomize: false,
-            //slides: false,
-            timer: null
+            Reveal: Reveal,
+            slideSelector: '.reveal > .slides > section',
+            questionSlideClass: 'test',
+            questionSlideSelector: null,
+            testSubmitButton: 'button',
+            testTime: null,
+            timerContainer: '.timer',
+            passingScore: '100%'
         }, options);
         pipwerks.debug.isActive = this.options.debug;
+        if ('undefined' === typeof this.options.questionSlideSelector || null === this.options.questionSlideSelector) {
+            this.options.questionSlideSelector = this.options.slideSelector + '.' + this.options.questionSlideClass;
+        }
 
         this.questionIdMap = {};
-        this.questionCollection = [];
+        this.questionPool = [];
+        this.questions = [];
+        this.sessionStartTime = null;
+        this.testStartTime = null;
+        this.testTimerId = null;
+        this.firstTestSlideIndex = null;
 
         this.load(url);
     }
@@ -22,12 +35,12 @@ class Gift {
     load(url) {
         $.ajax({
             url: url,
-            success: this.parseAndRender.bind(this),
+            success: this.parseAndRun.bind(this),
             dataType: 'text'
         });
     }
 
-    parseAndRender(data) {
+    parseAndRun(data) {
         if (!this.options.debug) {
             if ('undefined' === typeof atob) {
                 this.log('runtime error: unsupported browser.');
@@ -35,15 +48,20 @@ class Gift {
             }
             data = atob(data);
         }
-        this.parse(data).render();
+        this.parseQuestionPool(data)
+            .selectQuestions()
+            .render()
+            .attachEventHandlers()
+            .run();
     }
 
-    parse(data) {
+    parseQuestionPool(data) {
         let lines = data.split("\n");
         let questionIdMap = {};
-        let questionCollection = [];
+        let questionPool = [];
         let currentQuestionCode = '';
         let isInside = false;
+
         for (const line of lines) {
             //remove comments and white spaces
             let cleanedLine = line.replace(/\/\/.*$/, '').trim();
@@ -65,15 +83,15 @@ class Gift {
                     this.log('parse error: closing a question while none is opened.');
                 }
                 let question = this.parseQuestion(currentQuestionCode);
-                question.id = 'Q' + questionCollection.length;
-                questionCollection.push(question);
+                question.id = 'Q' + questionPool.length;
+                questionPool.push(question);
                 questionIdMap[question.id] = question;
                 currentQuestionCode = '';
                 isInside = false;
             }
         }
 
-        this.questionCollection = questionCollection;
+        this.questionPool = questionPool;
         this.questionIdMap = questionIdMap;
 
         return this;
@@ -89,7 +107,7 @@ class Gift {
         // True/False
         if (this.inArray(answersCode, ['T', 'F'])) {
             return {
-                type: this.constructor.trueFalse,
+                type: this.constructor.trueFalseType,
                 //TODO: title:
                 question: question,
                 answer: 'T' === answersCode
@@ -113,7 +131,7 @@ class Gift {
                 answers.push(part.split(' -> '));
             }
             return {
-                type: this.constructor.matching,
+                type: this.constructor.matchingType,
                 question: question,
                 answers: answers
             }
@@ -143,7 +161,7 @@ class Gift {
             });
         }
         return {
-            type: this.constructor.choice,
+            type: this.constructor.choiceType,
             question: question,
             answers: answers,
         };
@@ -163,89 +181,200 @@ class Gift {
         return -1 < $.inArray(what, array);
     }
 
-    render() {
-        let questions = this.questionCollection;
+    selectQuestions() {
+        let questions = this.questionPool;
         if (this.options.randomize) {
             questions = questions.shuffle();
         }
         if (Number.isInteger(this.options.subset)) {
             questions = questions.slice(0, this.options.subset);
         }
-        let questionElements = [];
-        for (let questionIndex = 0; questionIndex < questions.length; questionIndex++) {
-            let question = questions[questionIndex];
-            let questionContainerElement = $('<legend>').text(question.question).appendTo($('<fieldset id="' + question.id + '" class="' + question.type + '">')).parent();
+        this.questions = questions;
+
+        return this;
+    }
+
+    render() {
+        let submitSlide = $(this.options.testSubmitButton).closest(this.options.slideSelector);
+        for (let questionIndex = 0; questionIndex < this.questions.length; questionIndex++) {
+            let question = this.questions[questionIndex];
+            let questionContainerElement = $('<legend>').text(question.question).appendTo($('<fieldset id="' + question.id + '" class="question ' + question.type + '">')).parent();
             switch (question.type) {
-                case this.constructor.trueFalse: {
+                case this.constructor.trueFalseType: {
                     questionContainerElement.append($('<label><input type="radio" name="' + question.id + '" value="true"> True</label>'));
                     questionContainerElement.append($('<label><input type="radio" name="' + question.id + '" value="false"> False</label>'));
                 }
                     break;
-                case this.constructor.choice: {
+                case this.constructor.choiceType: {
                     //TODO
                 }
                     break;
-                case this.constructor.matching: {
+                case this.constructor.matchingType: {
                     //TODO
                 }
                     break;
                 default:
                     this.log('runtime error: unknown question type: '.question.type);
             }
-            $('<button type="submit" data-question-id="' + question.id + '" data-question-index="' + questionIndex + '">Submit</button>').hide().appendTo(questionContainerElement);
-            questionElements.push(questionContainerElement);
+            $('<section class="' + this.options.questionSlideClass + '">').append(questionContainerElement).insertBefore(submitSlide);
         }
-        this.container.append(questionElements);
-        this.attachEventHandlers();
-        this.startTime = new Date();
+        this.options.Reveal.sync();
+        this.options.Reveal.slide(0, 0);
+
+        this.firstTestSlideIndex = $(this.options.slideSelector).index($(this.options.questionSlideSelector));
+
+        return this;
     }
 
     attachEventHandlers() {
-        $('input[type="radio"]').click(function (event) {
-            $(this).closest('fieldset').find('button').show();
-        });
-        $('button').each(function (index, element) {
-            $(element).data('gift', this).click(function (event) {
-                event.preventDefault();
-                $(this).data('gift').submit($(this).data('question-id'), $(this).data('question-index'));
-            })
+        $('input[type="radio"]').click(function () {
+            $(this).blur();
+        })
+        $('button').click(function (event) {
+            this.submit();
         }.bind(this));
+        this.options.Reveal.addEventListener('slidechanged', function (event) {
+            let currentSlide = $(event.currentSlide);
+            if (currentSlide.is(this.options.questionSlideSelector)) {
+                if (null !== this.options.testTime && null === this.testTimerId) {
+                    $(this.options.timerContainer).show();
+                    this.testStartTime = new Date();
+                    this.testTimerId = setInterval(this.runTestTimer.bind(this), 1000);
+                }
+                currentSlide.data('start-time', new Date());
+            }
+            let previousSlide = $(event.previousSlide);
+            if (previousSlide.is(this.options.questionSlideSelector)) {
+                let latency = new Date().getTime() - previousSlide.data('start-time').getTime();
+                if (previousSlide.data('latency')) {
+                    latency += previousSlide.data('latency');
+                }
+                previousSlide.data('latency', latency);
+            }
+        }.bind(this));
+
+        return this;
     }
 
-    submit(questionId, questionIndex) {
-        let question = this.questionIdMap[questionId];
-        let questionContainerElement = $('#' + questionId);
-        let keyPrefix = 'cmi.interactions.' + questionIndex + '.';
-        let data = {
-            id: question.id,
-            type: question.type
+    slideNumber(slide) {
+        let indices = this.options.Reveal.getIndices(slide);
+        if ($(slide).is(this.options.questionSlideSelector)) {
+            return ['Q ' + (indices.h + 1 - this.firstTestSlideIndex) + '/' + this.questions.length];
+        } else if (0 === indices.h && !$(this.options.Reveal.getCurrentSlide()).is(this.options.questionSlideSelector)) {
+            return ['Intro'];
+        } else {
+            return [indices.h < this.firstTestSlideIndex ? 'Intro' : 'Outro'];
+        }
+    }
+
+    runTestTimer() {
+        let timeSpent = (new Date().getTime() - this.testStartTime.getTime()) / 1000;
+        let timeLeft = Math.round(this.options.testTime - timeSpent);
+
+        // Display
+        let minutes = (timeLeft - timeLeft % 60) / 60;
+        let seconds = timeLeft % 60;
+        $(this.options.timerContainer).text((minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds);
+
+        // Handle timeout
+        if (0 >= timeLeft) {
+            this.submit(this.constructor.timeOutExit);
+
+            clearInterval(this.testTimerId);
+        }
+    }
+
+    run() {
+        ScormUtils.startTime = this.sessionStartTime = new Date()
+        ScormUtils.multipleSetAndSave({
+            'cmi.core.exit': this.constructor.suspendExit
+        });
+
+        return this;
+    }
+
+    submit(exit = this.constructor.normalExit) {
+        let configScores = this.getConfigurationScores();
+        this.testData = {
+            'cmi.student_data.mastery_score': configScores.passing,
+            'cmi.core.score.min': configScores.min,
+            'cmi.core.score.max': configScores.max
         };
-        switch (question.type) {
-            case this.constructor.trueFalse: {
-                data['result'] = 'unanticipated';
-                let correctResponse = data['correct_responses.0.pattern'] = question.answer ? 'true' : 'false';
-                let studentResponse = data['student_response'] = questionContainerElement.find('input:checked').val();
-                if (this.inArray(studentResponse, ['true', 'false'])) {
-                    data['result'] = correctResponse === studentResponse ? 'correct' : 'wrong';
+        let score = 0;
+        $(this.options.questionSlideSelector + ' fieldset.question').each(function (questionIndex, questionElement) {
+            let questionId = $(questionElement).attr('id');
+            let question = this.questionIdMap[questionId];
+            let questionContainerElement = $('#' + questionId);
+            let questionSlide = questionContainerElement.closest(this.options.questionSlideSelector);
+            let keyPrefix = 'cmi.interactions.' + questionIndex + '.';
+            let data = {
+                id: question.id,
+                type: question.type,
+                time: ScormUtils.getCmiTime(questionSlide.data('start-time')),
+                latency: ScormUtils.getCmiTimespan(questionSlide.data('latency')),
+                weighting: 1
+            };
+            switch (question.type) {
+                case this.constructor.trueFalseType: {
+                    data.result = this.constructor.unanticipatedResult;
+                    let correctResponse = data['correct_responses.0.pattern'] = question.answer ? 'true' : 'false';
+                    let studentResponse = data['student_response'] = questionContainerElement.find('input:checked').val();
+                    if (this.inArray(studentResponse, ['true', 'false'])) {
+                        data.result = correctResponse === studentResponse ? this.constructor.correctResult : this.constructor.wrongResult;
+                        score += correctResponse === studentResponse ? 1 : 0;
+                    }
                 }
+                    break;
+                case this.constructor.choiceType: {
+                    //TODO
+                }
+                    break;
+                case this.constructor.matchingType: {
+                    //TODO
+                }
+                    break;
+                default:
+                    this.log('runtime error: unknown question type: '.question.type);
             }
-                break;
-            case this.constructor.choice: {
-                //TODO
+            let prefixedData = {};
+            for (const key in data) {
+                prefixedData[keyPrefix + key] = data[key];
             }
-                break;
-            case this.constructor.matching: {
-                //TODO
-            }
-                break;
-            default:
-                this.log('runtime error: unknown question type: '.question.type);
+            Object.assign(this.testData, prefixedData);
+        }.bind(this));
+
+        this.testData['cmi.core.score.raw'] = score;
+        this.testData['cmi.core.lesson_status'] = score >= configScores.passing ? this.constructor.passedStatus : this.constructor.failedStatus;
+        this.log(this.testData);
+
+        ScormUtils.multipleSetAndSave(this.testData);
+
+        return this;
+    }
+
+    getConfigurationScores() {
+        let passingConf = this.options.passingScore;
+        let passingScore = null;
+        let maxScore = null;
+
+        if (null !== this.options.subset) {
+            maxScore = this.options.subset;
+        } else {
+            maxScore = this.questions.length; // means that this.selectQuestions() must have been already called.
         }
-        let prefixedData = {};
-        for (const key in data) {
-            prefixedData[keyPrefix + key] = data[key];
+
+        if ('number' === typeof passingConf || passingConf === '' + parseFloat(passingConf)) {
+            passingScore = parseFloat(this.options.passingScore)
         }
-        console.log(prefixedData);
+        if ('string' === typeof passingConf && '%' === passingConf.slice(-1)) {
+            passingScore = maxScore * parseFloat(passingConf) / 100;
+        }
+
+        return {
+            'passing': passingScore,
+            'max': maxScore,
+            'min': 0
+        };
     }
 
     log(msg) {
@@ -254,8 +383,30 @@ class Gift {
         }
     }
 
-    static trueFalse = 'true-false';
-    static choice = 'choice';
-    static matching = 'matching';
-    //TODO: other question types
+    //TODO: move to ScormUtils
+
+    static trueFalseType = 'true-false';
+    static choiceType = 'choice';
+    //static fillInType = 'fill-in'
+    static matchingType = 'matching';
+    //static performanceType = 'performance';
+    //static sequencingType = 'sequencing';
+    //static likertType = 'likert';
+    //static numericType = 'numeric';
+
+    static correctResult = 'correct';
+    static wrongResult = 'wrong';
+    static neutralResult = 'neutral';
+    static unanticipatedResult = 'unanticipated';
+
+    static passedStatus = 'passed';
+    //static completedStatus = 'completed';
+    static failedStatus = 'failed';
+    //static incompleteStatus = 'incomplete';
+    //static browsedStatus = 'browsed';
+    //static notAttemptedStatus = 'not attempted';
+
+    static normalExit = '';
+    static timeOutExit = 'time-out';
+    static suspendExit = 'suspend';
 }
