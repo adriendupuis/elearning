@@ -13,12 +13,13 @@ let ScormUtils = {
         }
         return false;
     },
-    multipleSetAndSave: function (datas) {
-        let hasChanged = false;
-        for (const key in datas) {
-            hasChanged = hasChanged || this.set(key, datas[key]);
+    multipleSetAndSave: function (collection) {
+        let someDataHasChanged = false;
+        for (const key in collection) {
+            let dataHasChanged = this.set(key, collection[key]);
+            someDataHasChanged = dataHasChanged || someDataHasChanged;
         }
-        if (hasChanged) {
+        if (someDataHasChanged) {
             pipwerks.SCORM.save();
         }
     },
