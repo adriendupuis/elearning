@@ -28,6 +28,7 @@ class Gift {
         this.testStartTime = null;
         this.testTimerId = null;
         this.firstTestSlideIndex = null;
+        this.submitted = false;//Ask to the LMS
 
         this.load(url);
     }
@@ -147,7 +148,6 @@ class Gift {
             if ('' === part) {
                 continue;
             }
-            //TODO: Scoring
             if (this.inArray(part, ['=', '~'])) {
                 isRightAnswer = '=' === part;
                 continue;
@@ -231,6 +231,7 @@ class Gift {
             $(this).blur();
         })
         $('button').click(function (event) {
+            event.preventDefault();
             this.submit();
         }.bind(this));
         this.options.Reveal.addEventListener('slidechanged', function (event) {
@@ -279,12 +280,11 @@ class Gift {
         // Handle timeout
         if (0 >= timeLeft) {
             this.submit(this.constructor.timeOutExit);
-
-            clearInterval(this.testTimerId);
         }
     }
 
     run() {
+        pipwerks.SCORM.init();
         ScormUtils.startTime = this.sessionStartTime = new Date()
         ScormUtils.multipleSetAndSave({
             'cmi.core.exit': this.constructor.suspendExit
@@ -294,9 +294,15 @@ class Gift {
     }
 
     submit(exit = this.constructor.normalExit) {
+        if (this.submitted) {
+            this.log('runtime error: submitted more than once');
+            return this;
+        }
+        clearInterval(this.testTimerId);
+        this.submitted = true;
         let configScores = this.getConfigurationScores();
         this.testData = {
-            'cmi.student_data.mastery_score': configScores.passing,
+            //'cmi.student_data.mastery_score': configScores.passing,// read only
             'cmi.core.score.min': configScores.min,
             'cmi.core.score.max': configScores.max
         };
@@ -314,11 +320,14 @@ class Gift {
                 latency: ScormUtils.getCmiTimespan(questionSlide.data('latency')),
                 weighting: 1
             };
+            if ('2004' === pipwerks.SCORM.version) {
+                data.desscription = question.question;// SCORM 2004 2nd Edition
+            }
             switch (question.type) {
                 case this.constructor.trueFalseType: {
                     data.result = this.constructor.unanticipatedResult;
                     let correctResponse = data['correct_responses.0.pattern'] = question.answer ? 'true' : 'false';
-                    let studentResponse = data['student_response'] = questionContainerElement.find('input:checked').val();
+                    let studentResponse = data.student_response = questionContainerElement.find('input:checked').val();
                     if (this.inArray(studentResponse, ['true', 'false'])) {
                         data.result = correctResponse === studentResponse ? this.constructor.correctResult : this.constructor.wrongResult;
                         score += correctResponse === studentResponse ? 1 : 0;
