@@ -11,7 +11,7 @@ class Gift {
             slideSelector: '.reveal > .slides > section',
             questionSlideClass: 'test',
             questionSlideSelector: null,
-            testSubmitButton: 'button',
+            testSubmitButton: 'section button',
             testTime: null,
             timerContainer: '.timer',
             passingScore: '100%'
@@ -294,12 +294,14 @@ class Gift {
     }
 
     submit(exit = this.constructor.normalExit) {
+        $(this.options.testSubmitButton).hide();
+        clearInterval(this.testTimerId);
         if (this.submitted) {
             this.log('runtime error: submitted more than once');
             return this;
         }
-        clearInterval(this.testTimerId);
         this.submitted = true;
+
         let configScores = this.getConfigurationScores();
         this.testData = {
             //'cmi.student_data.mastery_score': configScores.passing,// read only
@@ -352,11 +354,17 @@ class Gift {
             Object.assign(this.testData, prefixedData);
         }.bind(this));
 
+        let passed = score >= configScores.passing;
+
         this.testData['cmi.core.score.raw'] = score;
-        this.testData['cmi.core.lesson_status'] = score >= configScores.passing ? this.constructor.passedStatus : this.constructor.failedStatus;
+        this.testData['cmi.core.lesson_status'] = passed ? this.constructor.passedStatus : this.constructor.failedStatus;
         this.log(this.testData);
 
         ScormUtils.multipleSetAndSave(this.testData);
+
+        let feedback = Math.round(100 * score / configScores.max) + '% ' + (passed ? '≥' : '<') + ' ' + configScores.percent;
+        $('<div class="feedback ' + (passed ? 'passed' : 'failed') + '">').text(feedback).insertAfter(this.options.testSubmitButton);
+        $(this.options.testSubmitButton).remove();
 
         return this;
     }
@@ -364,6 +372,7 @@ class Gift {
     getConfigurationScores() {
         let passingConf = this.options.passingScore;
         let passingScore = null;
+        let passingPercent = null;
         let maxScore = null;
 
         if (null !== this.options.subset) {
@@ -373,13 +382,16 @@ class Gift {
         }
 
         if ('number' === typeof passingConf || passingConf === '' + parseFloat(passingConf)) {
-            passingScore = parseFloat(this.options.passingScore)
+            passingScore = parseFloat(this.options.passingScore);
+            passingPercent = Math.round(100 * passingScore / maxScore) + '%';
         }
         if ('string' === typeof passingConf && '%' === passingConf.slice(-1)) {
             passingScore = maxScore * parseFloat(passingConf) / 100;
+            passingPercent = passingConf;
         }
 
         return {
+            'percent': passingPercent,
             'passing': passingScore,
             'max': maxScore,
             'min': 0
