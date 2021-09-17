@@ -1,4 +1,4 @@
-# SCORM reveal.js Demo
+# eLearning reveal.js Demo
 
 ## Intro
 
