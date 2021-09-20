@@ -51,12 +51,12 @@
         height: '100%',
         margin: 0,
         plugins: [RevealMarkdown/*, RevealHighlight*/]
+    }).then(function() {
+        let gift = new Gift('./scorm.gift.txt', {debug: true, testTime: 120});
+        //new Gift('./scorm.gift.encoded.txt', {testTime: 3600, randomize: true, subset: 45, score: '67%'});
+
+        Reveal.configure({slideNumber: gift.slideNumber.bind(gift)});
     });
-
-    let gift = new Gift('./scorm.gift.txt', {debug: true, testTime: 120});
-    //new Gift('./scorm.gift.encoded.txt', {testTime: 3600, randomize: true, subset: 45, score: '67%'});
-
-    Reveal.configure({slideNumber: gift.slideNumber.bind(gift)});
 </script>
 </body>
 </html>
