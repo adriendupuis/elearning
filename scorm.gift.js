@@ -7,6 +7,7 @@ class Gift {
             debug: false,
             subset: null,
             randomize: false,
+            addQuestionTextToId: false,
             Reveal: Reveal,
             slideSelector: '.reveal > .slides > section',
             questionSlideClass: 'test',
@@ -324,6 +325,8 @@ class Gift {
             };
             if ('2004' === pipwerks.SCORM.version) {
                 data.desscription = question.question;// SCORM 2004 2nd Edition
+            } else if (this.options.addQuestionTextToId) {
+                data.id = (question.id + question.question.replace(/[^0-9a-zA-Z]/gi, '')).substr(0, 255);// CMIIdentifier
             }
             switch (question.type) {
                 case this.constructor.trueFalseType: {
