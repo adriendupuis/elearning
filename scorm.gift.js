@@ -104,67 +104,68 @@ class Gift {
         let closingBracketIndex = this.indexOfSpecialCharacter(code, '}');
 
         let question = code.substring(0, openingBracketIndex).trim();
-        let answersCode = code.substring(openingBracketIndex + 1, closingBracketIndex).trim();
+        let responsesCode = code.substring(openingBracketIndex + 1, closingBracketIndex).trim();
 
         // True/False
-        if (this.inArray(answersCode, ['T', 'F'])) {
+        if (this.inArray(responsesCode, ['T', 'F'])) {
             return {
                 type: this.constructor.trueFalseType,
                 //TODO: title:
-                question: question,
-                answer: 'T' === answersCode
+                text: question,
+                response: 'T' === responsesCode
             };
         }
 
         // Matching
-        if (-1 < answersCode.indexOf(' -> ')) {
-            let answerParts = answersCode.split(/([~=])/);
-            let answers = [];
-            for (const part of answerParts) {
+        if (-1 < responsesCode.indexOf(' -> ')) {
+            let responseParts = responsesCode.split(/([~=])/);
+            let responses = [];
+            for (const part of responseParts) {
                 if ('' === part) {
                     continue;
                 }
                 if (this.inArray(part, ['=', '~'])) {
                     if ('~' === part) {
-                        this.log('parse error: there is no wrong answer in matching question type.')
+                        this.log('parse error: there is no wrong response in matching question type.')
                     }
                     continue;
                 }
-                answers.push(part.split(' -> '));
+                responses.push(part.split(' -> '));
             }
             return {
                 type: this.constructor.matchingType,
-                question: question,
-                answers: answers
+                text: question,
+                responses: responses
             }
         }
 
         //TODO: other question types
 
         // Multiple Choice
-        let answers = [];
-        let answerParts = answersCode.split(/([~=])/);
-        let isRightAnswer = null;
-        for (const part of answerParts) {
+        let responses = [];
+        let responseParts = responsesCode.split(/([~=])/);
+        let isCorrectResponse = null;
+        for (const part of responseParts) {
             if ('' === part) {
                 continue;
             }
             if (this.inArray(part, ['=', '~'])) {
-                isRightAnswer = '=' === part;
+                isCorrectResponse = '=' === part;
                 continue;
             }
-            if (null === isRightAnswer) {
-                this.log('parse error: answer is not right nor false');
+            if (null === isCorrectResponse) {
+                this.log('parse error: response is not correct nor wrong');
             }
-            answers.push({
-                isRight: isRightAnswer,
-                proposal: part
+            responses.push({
+                isCorrect: isCorrectResponse,
+                text: part
             });
+            isCorrectResponse = null;
         }
         return {
             type: this.constructor.choiceType,
-            question: question,
-            answers: answers,
+            text: question,
+            responses: responses,
         };
     }
 
@@ -199,7 +200,7 @@ class Gift {
         let submitSlide = $(this.options.testSubmitButton).closest(this.options.slideSelector);
         for (let questionIndex = 0; questionIndex < this.questions.length; questionIndex++) {
             let question = this.questions[questionIndex];
-            let questionContainerElement = $('<legend>').text(question.question).appendTo($('<fieldset id="' + question.id + '" class="question ' + question.type + '">')).parent();
+            let questionContainerElement = $('<legend>').text(question.text).appendTo($('<fieldset id="' + question.id + '" class="question ' + question.type + '">')).parent();
             switch (question.type) {
                 case this.constructor.trueFalseType: {
                     questionContainerElement.append($('<label><input type="radio" name="' + question.id + '" value="true"> True</label>'));
@@ -207,7 +208,9 @@ class Gift {
                 }
                     break;
                 case this.constructor.choiceType: {
-                    //TODO
+                    $.each(question.responses, function(index, response) {
+                        questionContainerElement.append($('<label><input type="checkbox" name="' + question.id + '" value="'+index+'"> '+response.text+'</label>'));
+                    });
                 }
                     break;
                 case this.constructor.matchingType: {
@@ -228,7 +231,7 @@ class Gift {
     }
 
     attachEventHandlers() {
-        $('input[type="radio"]').click(function () {
+        $('[type="radio"], [type="checkbox"]').click(function () {
             $(this).blur();
         })
         $('button').click(function (event) {
@@ -241,6 +244,7 @@ class Gift {
                 if (null !== this.options.testTime && null === this.testTimerId) {
                     $(this.options.timerContainer).show();
                     this.testStartTime = new Date();
+                    this.runTestTimer();
                     this.testTimerId = setInterval(this.runTestTimer.bind(this), 1000);
                 }
                 currentSlide.data('start-time', new Date());
@@ -324,23 +328,54 @@ class Gift {
                 weighting: 1
             };
             if ('2004' === pipwerks.SCORM.version) {
-                data.desscription = question.question;// SCORM 2004 2nd Edition
+                data.desscription = question.text;// SCORM 2004 2nd Edition
             } else if (this.options.addQuestionTextToId) {
-                data.id = (question.id + question.question.replace(/[^0-9a-zA-Z]/gi, '')).substr(0, 255);// CMIIdentifier
+                data.id = (question.id + question.text.replace(/[^0-9a-zA-Z]/gi, '')).substr(0, 255);// CMIIdentifier
             }
+            data.result = this.constructor.neutralResult;
             switch (question.type) {
                 case this.constructor.trueFalseType: {
-                    data.result = this.constructor.unanticipatedResult;
-                    let correctResponse = data['correct_responses.0.pattern'] = question.answer ? 'true' : 'false';
-                    let studentResponse = data.student_response = questionContainerElement.find('input:checked').val();
+                    let correctResponse = question.response ? 'true' : 'false';
+                    data['correct_responses.0.pattern'] = question.response ? '1' : '0';
+                    let studentResponse = questionContainerElement.find('input:checked').val();
                     if (this.inArray(studentResponse, ['true', 'false'])) {
+                        data.student_response = 'true' === studentResponse ? '1' : '0';
                         data.result = correctResponse === studentResponse ? this.constructor.correctResult : this.constructor.wrongResult;
                         score += correctResponse === studentResponse ? 1 : 0;
+                    } else if (studentResponse) {
+                        data.result = this.constructor.unanticipatedResult;
                     }
                 }
                     break;
                 case this.constructor.choiceType: {
-                    //TODO
+                    let correctResponseCount = 0;
+                    let studentCorrectResponseCount = 0;
+                    let studentWrongResponseCount = 0;
+                    let correctResponsePattern = [];
+                    let studentResponse = [];
+                    $.each(question.responses, function(index, response) {
+                        let isStudentResponse = questionContainerElement.find('input[value="'+index+'"]').is(':checked');
+                        if (response.isCorrect) {
+                            correctResponsePattern.push(index);
+                            ++correctResponseCount;
+                            if (isStudentResponse) {
+                                studentResponse.push(index);
+                                ++studentCorrectResponseCount;
+                            }
+                        } else if (isStudentResponse) {
+                            studentResponse.push(index);
+                            ++studentWrongResponseCount;
+                        }
+                    });
+                    data['correct_responses.0.pattern'] = correctResponsePattern.join(',');
+                    if (0 < studentCorrectResponseCount - studentWrongResponseCount) {
+                        data.result = this.constructor.correctResult;
+                    } else if (0 > studentCorrectResponseCount - studentWrongResponseCount) {
+                        data.result = this.constructor.wrongResult;
+                    } else {
+                        data.result = this.constructor.neutralResult;
+                    }
+                    score += Math.max(0, studentCorrectResponseCount - studentWrongResponseCount) / correctResponseCount;
                 }
                     break;
                 case this.constructor.matchingType: {
