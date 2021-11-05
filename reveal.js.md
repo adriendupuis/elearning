@@ -35,6 +35,8 @@ some:
 
 ## Part 2.1
 
+Skeleton is provided in [this zip archive: skeleton.zip](download/skeleton.zip)
+
 --
 
 ## Part 2.2

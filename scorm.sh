@@ -33,7 +33,7 @@ fi;
 
 cp $indexFile $scormPackageRoot/$scormPackageResourcesDir/;
 for path in $resources; do
-  cp -r $path $scormPackageRoot/$scormPackageResourcesDir/;
+  cp -r ${path%%/} $scormPackageRoot/$scormPackageResourcesDir/;
 done;
 
 
