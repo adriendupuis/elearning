@@ -22,6 +22,17 @@ releaseDir='./release';
 outputFile="$releaseDir/$outputFile";
 
 
+# Framework
+
+function sedi() {
+  if [ 'Darwin' == `uname` ]; then
+    sed -i '' "$1" "$2";
+  else
+    sed -i "$1" "$2";
+  fi;
+}
+
+
 # Config and arguments checking
 if [ -e $scormPackageRoot ]; then
   echo "Error: $scormPackageRoot already exists.";
@@ -61,14 +72,14 @@ for file in $(find $scormPackageRoot/$scormPackageResourcesDir -type f); do
 done
 if $useScormDotComManifestTemplate; then
   curl --output $scormPackageRoot/imsmanifest.xml https://scorm.com/wp-content/assets/SchemaDefinitionFiles/SCORM%201.2%20Schema%20Definition/imsmanifest.xml;
-  sed -i '' "s@<title>Title</title>@<title>$outputTitle</title>@" $scormPackageRoot/imsmanifest.xml;
-  sed -i '' "s@<resource \(.*\) href=\"index.html\">@<resource \1 href=\"$scormPackageResourcesDir/$indexFile\">@" $scormPackageRoot/imsmanifest.xml;
-  sed -i '' "s@<file href=\"index.html\" />@$files@" $scormPackageRoot/imsmanifest.xml;
+  sedi "s@<title>Title</title>@<title>$outputTitle</title>@" $scormPackageRoot/imsmanifest.xml;
+  sedi "s@<resource \(.*\) href=\"index.html\">@<resource \1 href=\"$scormPackageResourcesDir/$indexFile\">@" $scormPackageRoot/imsmanifest.xml;
+  sedi "s@<file href=\"index.html\" />@$files@" $scormPackageRoot/imsmanifest.xml;
 else
-  sed -i '' 's@Course_1_organization@organization@' $scormPackageRoot/imsmanifest.xml;
-  sed -i '' "s@<title>Course_1</title>@<title>$outputTitle</title>@" $scormPackageRoot/imsmanifest.xml;
-  sed -i '' "s@<resource \(.*\) href=\"res/start_1.html\">@<resource \1 href=\"$scormPackageResourcesDir/$indexFile\">@" $scormPackageRoot/imsmanifest.xml;
-  sed -i '' "s@<file href=\"res/start_1.html\"/>@$files@" $scormPackageRoot/imsmanifest.xml;
+  sedi 's@Course_1_organization@organization@' $scormPackageRoot/imsmanifest.xml;
+  sedi "s@<title>Course_1</title>@<title>$outputTitle</title>@" $scormPackageRoot/imsmanifest.xml;
+  sedi "s@<resource \(.*\) href=\"res/start_1.html\">@<resource \1 href=\"$scormPackageResourcesDir/$indexFile\">@" $scormPackageRoot/imsmanifest.xml;
+  sedi "s@<file href=\"res/start_1.html\"/>@$files@" $scormPackageRoot/imsmanifest.xml;
 fi;
 
 
