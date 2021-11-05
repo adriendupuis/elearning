@@ -1,0 +1,26 @@
+name: Release Asset
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Compile
+        run: bash scorm.all.sh
+
+      - name: Upload
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./revealjs.scorm.zip
+          asset_name: revealjs.scorm.zip
+          asset_content_type: application/zip
