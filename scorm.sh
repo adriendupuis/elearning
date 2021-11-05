@@ -18,11 +18,19 @@ scormPackageResourcesDir='resources';
 scormPackageTemplate='./scorm.package.template.tmp.zip';
 useScormDotComPackageTemplate=false;
 useScormDotComManifestTemplate=true;
+releaseDir='./release';
+outputFile="$releaseDir/$outputFile";
+
+
+# Config and arguments checking
 if [ -e $scormPackageRoot ]; then
   echo "Error: $scormPackageRoot already exists.";
   exit 1;
 fi;
 mkdir -p $scormPackageRoot/$scormPackageResourcesDir;
+if [ ! -d $releaseDir ]; then
+  mkdir -p $releaseDir;
+fi
 if [ -e $outputFile ]; then
   echo 'Warning: remove previous output file to renew it:';
   rm -v $outputFile;
