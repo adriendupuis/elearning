@@ -16,10 +16,10 @@ jobs:
           set -x
           bash scorm.all.sh
           assets=()
-          for asset in ./*.zip; do
-            assets+=("-a" "$asset")
+          for asset in ./release/*.zip; do
+            assets+=(-a $asset)
           done
-          tag_name="${GITHUB_REF##*/}"
-          hub release edit "${assets[@]}" -m "$tag_name" "$tag_name"
+          tag_name=${GITHUB_REF##*/}
+          hub release edit ${assets[@]} -m $tag_name $tag_name
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
