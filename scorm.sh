@@ -3,6 +3,7 @@
 # https://www.ispringsolutions.com/blog/how-to-convert-html-to-scorm#turninghtmltoscormthemanualway
 # https://myelearningworld.com/3-best-ways-to-create-a-scorm-content-package/
 
+
 # Arguments
 
 outputFile=$1;
@@ -22,18 +23,8 @@ releaseDir='./release';
 outputFile="$releaseDir/$outputFile";
 
 
-# Framework
+# Checks
 
-function sedi() {
-  if [ 'Darwin' == `uname` ]; then
-    sed -i '' "$1" "$2";
-  else
-    sed -i "$1" "$2";
-  fi;
-}
-
-
-# Config and arguments checking
 if [ -e $scormPackageRoot ]; then
   echo "Error: $scormPackageRoot already exists.";
   exit 1;
@@ -46,6 +37,17 @@ if [ -e $outputFile ]; then
   echo 'Warning: remove previous output file to renew it:';
   rm -v $outputFile;
 fi;
+
+
+# Framework
+
+function sedi() {
+  if [ 'Darwin' == `uname` ]; then
+    sed -i '' "$1" "$2";
+  else
+    sed -i "$1" "$2";
+  fi;
+}
 
 
 # Resources
