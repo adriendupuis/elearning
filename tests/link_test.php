@@ -10,7 +10,11 @@ if ($verbose) {
 $toBeFixed = false;
 foreach (array_slice($argv, 1) as $file) {
     echo "\n$file\n";
-    $grep = explode("\n", trim(shell_exec("grep -onE '$markdownPattern|$nakedUrlPattern' $file")));
+    $grep = trim(shell_exec("grep -onE '$markdownPattern|$nakedUrlPattern' $file"));
+    if (empty($grep)) {
+        continue;
+    }
+    $grep = explode("\n", $grep);
     $line = 0;
     for ($index = 0; $index < count($grep); ++$index) {
         $link = $grep[$index];
