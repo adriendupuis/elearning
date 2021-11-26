@@ -12,3 +12,10 @@ POCs and tools about self producing eLearning contents.
 ## Utils
 
 * List what's in a Zip archive: `unzip -l <archive.zip>;`.
+
+## Credits
+
+* Slides: _[reveal.js](https://revealjs.com/)_ [by @hakimel under MIT License](https://github.com/hakimel/reveal.js/blob/master/LICENSE)
+* SCORM:
+  - _SCORM API Wrapper_ [by Philip Hutchison under MIT-style License](https://github.com/pipwerks/scorm-api-wrapper)
+  - [Example SCORM courses](https://scorm.com/scorm-explained/technical-scorm/golf-examples/) at [scorm.com](https://scorm.com) by Rustici Software under [Creative Commons Attribution 3.0 License](https://creativecommons.org/licenses/by/3.0/)
