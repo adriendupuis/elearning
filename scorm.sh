@@ -14,10 +14,10 @@ resources=${@:4};
 
 # Config
 
-scormPackageRoot='./scorm.package.tmp';
-scormPackageResourcesDir='resources';
+packageRoot='./package.tmp';
+packageResourcesDir='resources';
 scormPackageTemplate='./scorm.package.template.tmp.zip';
-useScormDotComPackageTemplate=false;
+useScormDotComPackageTemplate=true;
 useScormDotComManifestTemplate=true;
 releaseDir='./release';
 outputFile="$releaseDir/$outputFile";
@@ -25,11 +25,11 @@ outputFile="$releaseDir/$outputFile";
 
 # Checks
 
-if [ -e $scormPackageRoot ]; then
-  echo "Error: $scormPackageRoot already exists.";
+if [ -e $packageRoot ]; then
+  echo "Error: $packageRoot already exists.";
   exit 1;
 fi;
-mkdir -p $scormPackageRoot/$scormPackageResourcesDir;
+mkdir -p $packageRoot/$packageResourcesDir;
 if [ ! -d $releaseDir ]; then
   mkdir -p $releaseDir;
 fi
@@ -52,44 +52,48 @@ function sedi() {
 
 # Resources
 
-cp $indexFile $scormPackageRoot/$scormPackageResourcesDir/;
+cp $indexFile $packageRoot/$packageResourcesDir/;
 for path in $resources; do
-  cp -r ${path%%/} $scormPackageRoot/$scormPackageResourcesDir/;
+  cp -r ${path%%/} $packageRoot/$packageResourcesDir/;
 done;
 
 
 # Manifest
 
 ## Structure and XSD
-#curl --output $scormPackageTemplate "https://21w98o3yqgi738kmv7xrf9lj-wpengine.netdna-ssl.com/wp-content/assets/golf_examples/PIFS/ContentPackagingSingleSCO_SCORM12.zip"; # https://scorm.com/scorm-explained/technical-scorm/golf-examples/
-curl --output $scormPackageTemplate "https://myelearningworld.com/wp-content/uploads/2016/05/course_1.zip"; # https://myelearningworld.com/3-best-ways-to-create-a-scorm-content-package/
-unzip $scormPackageTemplate *.xml *.xsd -d $scormPackageRoot;
+if useScormDotComPackageTemplate; then
+  curl --output $scormPackageTemplate "https://21w98o3yqgi738kmv7xrf9lj-wpengine.netdna-ssl.com/wp-content/assets/golf_examples/PIFS/ContentPackagingSingleSCO_SCORM12.zip"; # https://scorm.com/scorm-explained/technical-scorm/golf-examples/
+else
+  # Warning: No license found so it's "All right reserved" by default.
+  curl --output $scormPackageTemplate "https://myelearningworld.com/wp-content/uploads/2016/05/course_1.zip"; # https://myelearningworld.com/3-best-ways-to-create-a-scorm-content-package/
+fi;
+unzip $scormPackageTemplate *.xml *.xsd -d $packageRoot;
 rm $scormPackageTemplate;
 
 ## Resource declarations
 files='';
-for file in $(find $scormPackageRoot/$scormPackageResourcesDir -type f); do
-    file=$(echo "$file" | sed "s@$scormPackageRoot/@@");
+for file in $(find $packageRoot/$packageResourcesDir -type f); do
+    file=$(echo "$file" | sed "s@$packageRoot/@@");
     files+="<file href=\"$file\" />";
 done
 if $useScormDotComManifestTemplate; then
-  curl --output $scormPackageRoot/imsmanifest.xml https://scorm.com/wp-content/assets/SchemaDefinitionFiles/SCORM%201.2%20Schema%20Definition/imsmanifest.xml;
-  sedi "s@<title>Title</title>@<title>$outputTitle</title>@" $scormPackageRoot/imsmanifest.xml;
-  sedi "s@<resource \(.*\) href=\"index.html\">@<resource \1 href=\"$scormPackageResourcesDir/$indexFile\">@" $scormPackageRoot/imsmanifest.xml;
-  sedi "s@<file href=\"index.html\" />@$files@" $scormPackageRoot/imsmanifest.xml;
+  curl --output $packageRoot/imsmanifest.xml https://scorm.com/wp-content/assets/SchemaDefinitionFiles/SCORM%201.2%20Schema%20Definition/imsmanifest.xml;
+  sedi "s@<title>Title</title>@<title>$outputTitle</title>@" $packageRoot/imsmanifest.xml;
+  sedi "s@<resource \(.*\) href=\"index.html\">@<resource \1 href=\"$packageResourcesDir/$indexFile\">@" $packageRoot/imsmanifest.xml;
+  sedi "s@<file href=\"index.html\" />@$files@" $packageRoot/imsmanifest.xml;
 else
-  sedi 's@Course_1_organization@organization@' $scormPackageRoot/imsmanifest.xml;
-  sedi "s@<title>Course_1</title>@<title>$outputTitle</title>@" $scormPackageRoot/imsmanifest.xml;
-  sedi "s@<resource \(.*\) href=\"res/start_1.html\">@<resource \1 href=\"$scormPackageResourcesDir/$indexFile\">@" $scormPackageRoot/imsmanifest.xml;
-  sedi "s@<file href=\"res/start_1.html\"/>@$files@" $scormPackageRoot/imsmanifest.xml;
+  sedi 's@Course_1_organization@organization@' $packageRoot/imsmanifest.xml;
+  sedi "s@<title>Course_1</title>@<title>$outputTitle</title>@" $packageRoot/imsmanifest.xml;
+  sedi "s@<resource \(.*\) href=\"res/start_1.html\">@<resource \1 href=\"$packageResourcesDir/$indexFile\">@" $packageRoot/imsmanifest.xml;
+  sedi "s@<file href=\"res/start_1.html\"/>@$files@" $packageRoot/imsmanifest.xml;
 fi;
 
 
 # Package
 
-cd $scormPackageRoot;
+cd $packageRoot;
 zip -9 -r ../$outputFile .;
 cd -;
-rm -rf $scormPackageRoot;
+rm -rf $packageRoot;
 
 exit 0;
