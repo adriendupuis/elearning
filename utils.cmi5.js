@@ -1,30 +1,61 @@
-// https://aicc.github.io/CMI-5_Spec_Current/client/
-// https://github.com/adlnet/cmi5-Client-Library/tree/master/Examples
+/* Overrides few Cmi5 and CourseCmi5Plugin methods */
 
-function sentStatement(resp, obj) {
-    // Default callback for SendStatement
-    //console.log(resp, obj);
-}
+Cmi5.prototype.__setEndpoint = Cmi5.prototype.setEndpoint;
+Cmi5.prototype.setEndpoint = function (endpoint) {
+    // Remove trailing slash to avoid 404 when adding sub-path starting with one.
+    this.__setEndpoint(endpoint.replace(/\/$/, ''));
+};
 
-let Cmi5Utils = {
-    initCmi5Controller: function () {
-        cmi5Controller.setEndPoint(parse('endpoint'));
-        cmi5Controller.setFetchUrl(parse('fetch'));
-        cmi5Controller.setRegistration(parse('registration'));
-        cmi5Controller.setActivityId(parse('activityid'));
-        let actor = JSON.parse(parse('actor'));
-        actor.objectType = 'Agent';
-        cmi5Controller.setActor(JSON.stringify(actor));
-        return cmi5Controller;
-    },
-    GetDuration: function () {
-        if ('undefined' === typeof moment) {
-            console.log('dependency error: moment is missing');
+Cmi5.prototype.__sendStatement = Cmi5.prototype.sendStatement;
+Cmi5.prototype.sendStatement = async function (st) {
+    try {
+        await this.__sendStatement(st);
+    } catch (ex) {
+        // Avoid error on 200 instead of 204 but re-throw other errors.
+        if (ex.message !== 'Failed to send statement: status code 200') {
+            throw ex;
         }
-
-        var start = moment(cmi5Controller.getStartDateTime());
-        var end = moment(Date.now());
-
-        return moment.duration(end.diff(start), 'ms').toISOString();
     }
+};
+
+CourseCmi5Plugin.prototype.__setActivityState = CourseCmi5Plugin.prototype.setActivityState;
+CourseCmi5Plugin.prototype.setActivityState = async function (stateId, data) {
+    try {
+        return await this.__setActivityState(stateId, data);
+    } catch (ex) {
+        // Avoid error on setter empty response but re-throw other errors.
+        if (-1 === ex.message.toString().indexOf('Unexpected end of JSON input')) {
+            throw ex;
+        }
+    }
+};
+
+// Extend suspend data usage to more than bookmark
+CourseCmi5Plugin.prototype.getSuspendData = function () {
+    return this.getActivityState(SUSPEND_DATA_KEY).then(suspendDataObj => {
+        if (suspendDataObj) {
+            return Promise.resolve(suspendDataObj);
+        } else {
+            return Promise.resolve('');
+        }
+    });
+};
+CourseCmi5Plugin.prototype.setSuspendData = function (suspendData) {
+    return this.setActivityState(SUSPEND_DATA_KEY, suspendData);
+};
+CourseCmi5Plugin.prototype.setBookmark = function (bookmark) {
+    // Concat bookmark with other suspend data instead of overriding.
+    this.getSuspendData().then(suspendData => {
+        suspendData.bookmark = bookmark;
+        return this.setSuspendData(suspendData);
+    });
+};
+
+/* Add few Cmi5 or CourseCmi5Plugin methods */
+
+// Add a CourseCmi5Plugin.completed method like CourseCmi5Plugin.experienced
+if ('undefined' === typeof CourseCmi5Plugin.prototype.completed) {
+    CourseCmi5Plugin.prototype.completed = function (additionalProperties) {
+        this.cmi5.completed(additionalProperties);
+    };
 }
