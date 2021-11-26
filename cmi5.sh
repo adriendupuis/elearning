@@ -12,7 +12,7 @@ resources=${@:4};
 
 # Config
 
-packageRoot='./cmi5.package.tmp';
+packageRoot='./package.tmp';
 packageResourcesDir='resources';
 releaseDir='./release';
 outputFile="$releaseDir/$outputFile";
