@@ -51,13 +51,12 @@ if (pipwerks.SCORM.init()) {
     Reveal.addEventListener('slidechanged', function (event) {
         pipwerks.SCORM.set('cmi.core.lesson_location', RevealUtils.encodeLocation(event.indexh, event.indexv));
         RevealUtils.addSeenSlide(event.indexh, event.indexv);
+        ScormUtils.multipleSetAndSave({
+            'cmi.suspend_data': RevealUtils.getSeenSlides(),
+            'cmi.core.session_time': ScormUtils.getCmiTimespan(new Date().getTime() - ScormUtils.startTime.getTime())
+        });
         if (RevealUtils.hasSeenAllSlides()) {
             ScormUtils.complete();
-        } else {
-            ScormUtils.multipleSetAndSave({
-                'cmi.suspend_data': RevealUtils.getSeenSlides(),
-                'cmi.core.session_time': ScormUtils.getCmiTimespan(new Date().getTime() - ScormUtils.startTime.getTime())
-            });
         }
     });
 }

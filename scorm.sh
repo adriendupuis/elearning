@@ -16,7 +16,7 @@ resources=${@:4};
 packageRoot='./package.tmp';
 packageResourcesDir='resources';
 scormPackageTemplate='./scorm.package.template.tmp.zip';
-useScormDotComPackageTemplate=false;
+useScormDotComPackageTemplate=true;
 useScormDotComManifestTemplate=true;
 releaseDir='./release';
 outputFile="$releaseDir/$outputFile";
@@ -48,8 +48,12 @@ done;
 # Manifest
 
 ## Structure and XSD
-#curl --output $scormPackageTemplate "https://21w98o3yqgi738kmv7xrf9lj-wpengine.netdna-ssl.com/wp-content/assets/golf_examples/PIFS/ContentPackagingSingleSCO_SCORM12.zip"; # https://scorm.com/scorm-explained/technical-scorm/golf-examples/
-curl --output $scormPackageTemplate "https://myelearningworld.com/wp-content/uploads/2016/05/course_1.zip"; # https://myelearningworld.com/3-best-ways-to-create-a-scorm-content-package/
+if useScormDotComPackageTemplate; then
+  curl --output $scormPackageTemplate "https://21w98o3yqgi738kmv7xrf9lj-wpengine.netdna-ssl.com/wp-content/assets/golf_examples/PIFS/ContentPackagingSingleSCO_SCORM12.zip"; # https://scorm.com/scorm-explained/technical-scorm/golf-examples/
+else
+  # Warning: No license found so it's "All right reserved" by default.
+  curl --output $scormPackageTemplate "https://myelearningworld.com/wp-content/uploads/2016/05/course_1.zip"; # https://myelearningworld.com/3-best-ways-to-create-a-scorm-content-package/
+fi;
 unzip $scormPackageTemplate *.xml *.xsd -d $packageRoot;
 rm $scormPackageTemplate;
 
