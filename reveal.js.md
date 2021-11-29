@@ -1,4 +1,4 @@
-# SCORM reveal.js Demo
+# eLearning reveal.js Demo
 
 ## Intro
 
@@ -34,6 +34,8 @@ some:
 ---
 
 ## Part 2.1
+
+Skeleton is provided in [this zip archive: skeleton.zip](download/skeleton.zip)
 
 --
 

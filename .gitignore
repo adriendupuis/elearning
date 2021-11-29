@@ -1,4 +1,4 @@
-scorm.package.tmp/
+package.tmp/
 scorm.package.template.tmp.zip
-*.zip
+release/*.zip
 *.encoded.*
