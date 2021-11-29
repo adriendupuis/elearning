@@ -208,9 +208,11 @@ class Gift {
                 }
                     break;
                 case this.constructor.choiceType: {
+                    let list = $('<ul>');
                     $.each(question.responses, function(index, response) {
-                        questionContainerElement.append($('<label><input type="checkbox" name="' + question.id + '" value="'+index+'"> '+response.text+'</label>'));
+                        list.append($('<li><label><input type="checkbox" name="' + question.id + '" value="'+index+'"> '+response.text+'</label></li>'));
                     });
+                    list.appendTo(questionContainerElement);
                 }
                     break;
                 case this.constructor.matchingType: {
