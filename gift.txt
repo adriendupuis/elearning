@@ -18,5 +18,11 @@ Match the options below: {
 What is the good answer? {
   =This is the good answer.
   ~This is a wrong answer.
-  ~This answer isn't the right one.
+  ~This is also a wrong answer.
+}
+
+What are the good answers? {
+  =This is a good answer.
+  =This is also a good answer.
+  ~This is a wrong answer.
 }

@@ -1,0 +1,27 @@
+.matching-source-stack.left {
+    float: left;
+}
+.matching-destination-stack.right {
+    float: right;
+}
+.matching-source-stack, .matching-destination-stack {
+    min-width: 32px;
+    min-height: 32px;
+}
+ul.matching-source-stack, ul.matching-destination-stack {
+    list-style-position: inside;
+    margin: 0;
+    padding: 0;
+}
+.matching-source-stack, .matching-destination-item {
+    border: 1px solid black;
+}
+.matching-source-hover, .matching-destination-hover {
+    background: lemonchiffon;
+}
+.matching-source-item {
+    border: 1px dashed silver;
+}
+.matching-source-item:hover {
+    border: 1px dotted black;
+}
