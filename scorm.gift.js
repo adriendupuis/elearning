@@ -395,6 +395,7 @@ class Gift {
                         }
                     });
                     data['correct_responses.0.pattern'] = correctResponsePattern.join(',');
+                    data.student_response = studentResponse.join(',');
                     if (0 < studentCorrectResponseCount - studentWrongResponseCount) {
                         data.result = this.constructor.correctResult;
                     } else if (0 > studentCorrectResponseCount - studentWrongResponseCount) {
@@ -402,7 +403,6 @@ class Gift {
                     } else {
                         data.result = this.constructor.neutralResult;
                     }
-                    //TODO: data.student_response
                     score += Math.max(0, studentCorrectResponseCount - studentWrongResponseCount) / correctResponseCount;
                 }
                     break;
@@ -411,32 +411,41 @@ class Gift {
                     let studentCorrectResponseCount = 0;
                     let studentWrongResponseCount = 0;
                     let studentUnansweredCount = 0;
+                    let studentResponse = [];
                     questionContainerElement.find('.matching-destination-item').each(function() {
                         let source = $(this).find('.matching-destination-storage .matching-source-text').text();
                         let destination = $(this).find('.matching-destination-text').text();
-                        let correct = false;
-                        let unanswered = !source.length;
-                        if (unanswered) {
+                        if (!source.length) {
                             studentUnansweredCount++;
                         } else {
+                            let correct = false;
+                            let sourceIndex = null, destinationIndex = null;
                             $.each(question.responses, function (index, response) {
-                                if (source === response[0] && destination === response[1]) {
-                                    correct = true;
-                                    return;
+                                if (source === response[0]) {
+                                    sourceIndex = index;
+                                }
+                                if (destination === response[1]) {
+                                    destinationIndex = index;
                                 }
                             });
-                            if (correct) {
-                                studentCorrectResponseCount++;
+                            if (null === sourceIndex) { // Shouldn't occur
+                                studentUnansweredCount++;
                             } else {
-                                studentWrongResponseCount++;
+                                studentResponse.push(sourceIndex.toString()+destinationIndex.toString())
+                                if (sourceIndex === destinationIndex) {
+                                    studentCorrectResponseCount++;
+                                } else {
+                                    studentWrongResponseCount++;
+                                }
                             }
                         }
-                        console.log(source + ' => ' + destination, correct);
                     });
+                    let correctResponse = [];
                     $.each(question.responses, function (index, response) {
-                        //TODO: Check format expected by SCORM
-                        data['correct_responses.'+index+'.pattern'] = response[0] + ' => ' + response[1];
+                        correctResponse.push(index.toString()+index.toString());
                     });
+                    data['correct_responses.0.pattern'] = correctResponse.join(',');
+                    data.student_response = studentResponse.join(',');
                     if (0 < studentCorrectResponseCount - studentWrongResponseCount) {
                         data.result = this.constructor.correctResult;
                     } else if (0 > studentCorrectResponseCount - studentWrongResponseCount) {
@@ -444,7 +453,6 @@ class Gift {
                     } else {
                         data.result = this.constructor.neutralResult;
                     }
-                    //TODO: data.student_response
                     score += Math.max(0, studentCorrectResponseCount - studentWrongResponseCount) / correctResponseCount;
                 }
                     break;
