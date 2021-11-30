@@ -222,23 +222,23 @@ class Gift {
                         left.append($('<li class="matching-source-item matching-source-text">' + response[0] + '</li>'));
                     });
                     left.appendTo(questionContainerElement);
-                    let right = $('<ul class="right matching-destination-stack">');
+                    let right = $('<ul class="right matching-target-stack">');
                     $.each(question.responses.shuffle().shuffle(), function (index, response) {
-                        right.append($('<li class="matching-destination-item"><span class="matching-destination-text">' + response[1] + '</span><ul class="matching-destination-storage"></ul></li>'));
+                        right.append($('<li class="matching-target-item"><span class="matching-target-text">' + response[1] + '</span><ul class="matching-target-storage"></ul></li>'));
                     });
                     right.appendTo(questionContainerElement);
                     questionContainerElement.matching({
                         drop: function (event, ui) {
                             let sourceStack = questionContainerElement.find('.matching-source-stack');
-                            let destinationStack = questionContainerElement.find('.matching-destination-stack');
+                            let targetStack = questionContainerElement.find('.matching-target-stack');
                             //let sourceStack = $('#'+question.id).find('.matching-source-stack');
-                            //let destinationStack = $('#'+question.id).find('.matching-destination-stack');
+                            //let targetStack = $('#'+question.id).find('.matching-target-stack');
                             let sourceStackHeight = sourceStack.height();
-                            let destinationStackHeight = destinationStack.height();
-                            if (sourceStackHeight < destinationStackHeight) {
-                                sourceStack.height(destinationStackHeight);
-                            } else if (sourceStackHeight > destinationStackHeight) {
-                                destinationStack.height(sourceStackHeight);
+                            let targetStackHeight = targetStack.height();
+                            if (sourceStackHeight < targetStackHeight) {
+                                sourceStack.height(targetStackHeight);
+                            } else if (sourceStackHeight > targetStackHeight) {
+                                targetStack.height(sourceStackHeight);
                             }
                         }
                     });
@@ -412,27 +412,27 @@ class Gift {
                     let studentWrongResponseCount = 0;
                     let studentUnansweredCount = 0;
                     let studentResponse = [];
-                    questionContainerElement.find('.matching-destination-item').each(function() {
-                        let source = $(this).find('.matching-destination-storage .matching-source-text').text();
-                        let destination = $(this).find('.matching-destination-text').text();
+                    questionContainerElement.find('.matching-target-item').each(function() {
+                        let source = $(this).find('.matching-target-storage .matching-source-text').text();
+                        let target = $(this).find('.matching-target-text').text();
                         if (!source.length) {
                             studentUnansweredCount++;
                         } else {
                             let correct = false;
-                            let sourceIndex = null, destinationIndex = null;
+                            let sourceIndex = null, targetIndex = null;
                             $.each(question.responses, function (index, response) {
                                 if (source === response[0]) {
                                     sourceIndex = index;
                                 }
-                                if (destination === response[1]) {
-                                    destinationIndex = index;
+                                if (target === response[1]) {
+                                    targetIndex = index;
                                 }
                             });
                             if (null === sourceIndex) { // Shouldn't occur
                                 studentUnansweredCount++;
                             } else {
-                                studentResponse.push(sourceIndex.toString()+destinationIndex.toString())
-                                if (sourceIndex === destinationIndex) {
+                                studentResponse.push(sourceIndex.toString()+targetIndex.toString())
+                                if (sourceIndex === targetIndex) {
                                     studentCorrectResponseCount++;
                                 } else {
                                     studentWrongResponseCount++;

@@ -3,19 +3,19 @@ $.widget('custom.matching', {
         drop: null
     },
     _create: function () {
-        this.src = this.element.find('.matching-source-stack');
-        this.dest = this.element.find('.matching-destination-stack');
-        this.src.children().each(function () {
+        this.source = this.element.find('.matching-source-stack');
+        this.target = this.element.find('.matching-target-stack');
+        this.source.children().each(function () {
             $(this).draggable({
                 revert: 'invalid'
             });
         }).each(function (index, element) {
             $(element).data({
-                source: this.src,
+                source: this.source,
                 matching: this
             });
         }.bind(this));
-        this.src.droppable({
+        this.source.droppable({
             tolerance: 'pointer',
             hoverClass: 'matching-source-hover',
             drop: function (event, ui) {
@@ -25,13 +25,13 @@ $.widget('custom.matching', {
                 }).appendTo($(this)).data('source', $(this));
             }
         });
-        this.dest.children().each(function () {
+        this.target.children().each(function () {
             $(this).droppable({
                 tolerance: 'pointer',
-                hoverClass: 'matching-destination-hover',
+                hoverClass: 'matching-target-hover',
                 drop: function (event, ui) {
                     let draggable = ui.draggable;
-                    let storage = $(this).find('.matching-destination-storage');
+                    let storage = $(this).find('.matching-target-storage');
                     let previousDraggable = storage.children();
                     if (!previousDraggable.length || previousDraggable.length && previousDraggable.text() !== draggable.text()) {
                         if (previousDraggable.length) {

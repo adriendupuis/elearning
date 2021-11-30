@@ -1,22 +1,22 @@
 .matching-source-stack.left {
     float: left;
 }
-.matching-destination-stack.right {
+.matching-target-stack.right {
     float: right;
 }
-.matching-source-stack, .matching-destination-stack {
+.matching-source-stack, .matching-target-stack {
     min-width: 32px;
     min-height: 32px;
 }
-ul.matching-source-stack, ul.matching-destination-stack {
+ul.matching-source-stack, ul.matching-target-stack {
     list-style-position: inside;
     margin: 0;
     padding: 0;
 }
-.matching-source-stack, .matching-destination-item {
+.matching-source-stack, .matching-target-item {
     border: 1px solid black;
 }
-.matching-source-hover, .matching-destination-hover {
+.matching-source-hover, .matching-target-hover {
     background: lemonchiffon;
 }
 .matching-source-item {
