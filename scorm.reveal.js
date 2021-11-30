@@ -10,8 +10,17 @@ if ('undefined' === typeof Reveal) {
     console.log('dependency error: reveal.js is missing');
 }
 
-if (pipwerks.SCORM.init()) {
-    Reveal.addEventListener('ready', function (event) {
+Reveal.addEventListener('ready', function (event) {
+    // Open external links in new window to not disturb SCORM player
+    let anchors = document.getElementsByTagName('a');
+    let regex = /^(https?:)?\/\//;
+    for (var i = 0; i < anchors.length; i++) {
+        if (regex.test(anchors[i].getAttribute('href'))) {
+            anchors[i].setAttribute('target', '_blank');
+        }
+    }
+
+    if (pipwerks.SCORM.init()) {
         if (1 >= Reveal.getTotalSlides()) {
             ScormUtils.complete();
             return;
@@ -23,7 +32,8 @@ if (pipwerks.SCORM.init()) {
                     try {
                         seenSlides = JSON.parse(seenSlides);
                         RevealUtils.setSeenSlides(seenSlides);
-                    } catch(error) {}
+                    } catch (error) {
+                    }
                 }
 
                 let location = pipwerks.SCORM.get('cmi.core.lesson_location');
@@ -41,16 +51,16 @@ if (pipwerks.SCORM.init()) {
             'cmi.core.exit': 'suspend',
             'cmi.suspend_data': RevealUtils.getSeenSlides()
         });
-    });
-    Reveal.addEventListener('slidechanged', function (event) {
-        pipwerks.SCORM.set('cmi.core.lesson_location', RevealUtils.encodeLocation(event.indexh, event.indexv));
-        RevealUtils.addSeenSlide(event.indexh, event.indexv);
-        ScormUtils.multipleSetAndSave({
-            'cmi.suspend_data': RevealUtils.getSeenSlides(),
-            'cmi.core.session_time': ScormUtils.getCmiTimespan(new Date().getTime() - ScormUtils.startTime.getTime())
+        Reveal.addEventListener('slidechanged', function (event) {
+            pipwerks.SCORM.set('cmi.core.lesson_location', RevealUtils.encodeLocation(event.indexh, event.indexv));
+            RevealUtils.addSeenSlide(event.indexh, event.indexv);
+            ScormUtils.multipleSetAndSave({
+                'cmi.suspend_data': RevealUtils.getSeenSlides(),
+                'cmi.core.session_time': ScormUtils.getCmiTimespan(new Date().getTime() - ScormUtils.startTime.getTime())
+            });
+            if (RevealUtils.hasSeenAllSlides()) {
+                ScormUtils.complete();
+            }
         });
-        if (RevealUtils.hasSeenAllSlides()) {
-            ScormUtils.complete();
-        }
-    });
-}
+    }
+});
