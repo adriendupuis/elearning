@@ -4,9 +4,9 @@ This is a true assertion. {T}
 
 // No order question type in GIFT; matching can be used instead.
 What is the order? {
-  =This is first -> 1st
-  =This is second -> 2nd
-  =this is third -> 3rd
+  =This is first. -> 1
+  =This is second. -> 2
+  =This is third. -> 3
 }
 
 Match the options below: {

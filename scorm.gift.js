@@ -1,5 +1,7 @@
 // Docs:
 // - https://docs.moodle.org/en/GIFT_format
+// - SCORM 1.2 Specification availalbe at https://adlnet.gov/projects/scorm/#scorm-12
+//TODO: Separate SCORM from parser and UI for reusability
 
 class Gift {
     constructor(url, options = {}) {
@@ -78,13 +80,13 @@ class Gift {
                 }
                 isInside = true;
             }
-            currentQuestionCode += ' ' + cleanedLine;
+            currentQuestionCode += "\n" + cleanedLine;
             let closingBracketIndex = this.indexOfSpecialCharacter(cleanedLine, '}');
             if (-1 < closingBracketIndex) {
                 if (!isInside) {
                     this.log('parse error: closing a question while none is opened.');
                 }
-                let question = this.parseQuestion(currentQuestionCode);
+                let question = this.parseQuestion(currentQuestionCode.trim());
                 question.id = 'Q' + questionPool.length;
                 questionPool.push(question);
                 questionIdMap[question.id] = question;
@@ -116,25 +118,29 @@ class Gift {
             };
         }
 
-        // Matching
+        // Matching or Sequencing
         if (-1 < responsesCode.indexOf(' -> ')) {
             let responseParts = responsesCode.split(/([~=])/);
+            responseParts.shift();
             let responses = [];
             for (const part of responseParts) {
-                if ('' === part) {
-                    continue;
-                }
                 if (this.inArray(part, ['=', '~'])) {
                     if ('~' === part) {
                         this.log('parse error: there is no wrong response in matching question type.')
                     }
                     continue;
                 }
-                responses.push(part.split(' -> '));
+                responses.push(part.trim().split(' -> '));
             }
-            //TODO: detect sequencingType when each second part is an integer
+            let isSequencingType = true;
+            $.each(responses, function (index, response) {
+                if (!/^[0-9]+$/.test(response[1])) {
+                    isSequencingType = false;
+                    return false;
+                }
+            });
             return {
-                type: this.constructor.matchingType,
+                type: isSequencingType ? this.constructor.sequencingType : this.constructor.matchingType,
                 text: question,
                 responses: responses
             }
@@ -145,11 +151,9 @@ class Gift {
         // Multiple Choice
         let responses = [];
         let responseParts = responsesCode.split(/([~=])/);
+        responseParts.shift();
         let isCorrectResponse = null;
         for (const part of responseParts) {
-            if ('' === part) {
-                continue;
-            }
             if (this.inArray(part, ['=', '~'])) {
                 isCorrectResponse = '=' === part;
                 continue;
@@ -159,7 +163,8 @@ class Gift {
             }
             responses.push({
                 isCorrect: isCorrectResponse,
-                text: part
+                index: responses.length,
+                text: part.trim()
             });
             isCorrectResponse = null;
         }
@@ -211,28 +216,34 @@ class Gift {
                 case this.constructor.choiceType: {
                     let list = $('<ul>');
                     $.each(question.responses.shuffle(), function (index, response) {
-                        list.append($('<li><label><input type="checkbox" name="' + question.id + '" value="' + index + '"> ' + response.text + '</label></li>'));
+                        list.append($('<li><label><input type="checkbox" name="' + question.id + '" value="' + response.index + '"> ' + response.text + '</label></li>'));
                     });
                     list.appendTo(questionContainerElement);
                 }
                     break;
-                case this.constructor.matchingType: {
-                    let left = $('<ul class="left matching-source-stack">');
+                case this.constructor.sequencingType: {
+                    let list = $('<ul>');
                     $.each(question.responses.shuffle(), function (index, response) {
-                        left.append($('<li class="matching-source-item matching-source-text">' + response[0] + '</li>'));
+                        list.append($('<li>' + response[0] + '</li>'));
                     });
-                    left.appendTo(questionContainerElement);
-                    let right = $('<ul class="right matching-target-stack">');
+                    list.appendTo(questionContainerElement).sortable();
+                }
+                    break;
+                case this.constructor.matchingType: {
+                    let sourceStack = $('<ul class="left matching-source-stack">');
+                    $.each(question.responses.shuffle(), function (index, response) {
+                        sourceStack.append($('<li class="matching-source-item matching-source-text">' + response[0] + '</li>'));
+                    });
+                    sourceStack.appendTo(questionContainerElement);
+                    let targetStack = $('<ul class="right matching-target-stack">');
                     $.each(question.responses.shuffle().shuffle(), function (index, response) {
-                        right.append($('<li class="matching-target-item"><span class="matching-target-text">' + response[1] + '</span><ul class="matching-target-storage"></ul></li>'));
+                        targetStack.append($('<li class="matching-target-item"><span class="matching-target-text">' + response[1] + '</span><ul class="matching-target-storage"></ul></li>'));
                     });
-                    right.appendTo(questionContainerElement);
+                    targetStack.appendTo(questionContainerElement);
                     questionContainerElement.matching({
                         drop: function (event, ui) {
                             let sourceStack = questionContainerElement.find('.matching-source-stack');
                             let targetStack = questionContainerElement.find('.matching-target-stack');
-                            //let sourceStack = $('#'+question.id).find('.matching-source-stack');
-                            //let targetStack = $('#'+question.id).find('.matching-target-stack');
                             let sourceStackHeight = sourceStack.height();
                             let targetStackHeight = targetStack.height();
                             if (sourceStackHeight < targetStackHeight) {
@@ -406,13 +417,28 @@ class Gift {
                     score += Math.max(0, studentCorrectResponseCount - studentWrongResponseCount) / correctResponseCount;
                 }
                     break;
+                case this.constructor.sequencingType: {
+                    let correctResponseCount = question.responses.length;
+                    let studentCorrectResponseCount = 0;
+                    let studentWrongResponseCount = 0;
+                    // From SCORM RTE Specs: "The final positioning of the elements is used to determine correctness, not the order in which they were sequenced."
+                    $(questionContainerElement).find('li').each(function (index) {
+                        if ($(this).text() === question.responses[index][0]) {
+                            studentCorrectResponseCount++;
+                        } else {
+                            studentWrongResponseCount++;
+                        }
+                    });
+                    score += studentCorrectResponseCount / correctResponseCount;
+                }
+                    break;
                 case this.constructor.matchingType: {
                     let correctResponseCount = question.responses.length;
                     let studentCorrectResponseCount = 0;
                     let studentWrongResponseCount = 0;
                     let studentUnansweredCount = 0;
                     let studentResponse = [];
-                    questionContainerElement.find('.matching-target-item').each(function() {
+                    questionContainerElement.find('.matching-target-item').each(function () {
                         let source = $(this).find('.matching-target-storage .matching-source-text').text();
                         let target = $(this).find('.matching-target-text').text();
                         if (!source.length) {
@@ -427,11 +453,14 @@ class Gift {
                                 if (target === response[1]) {
                                     targetIndex = index;
                                 }
+                                if (null !== sourceIndex && null !== targetIndex) {
+                                    return false;
+                                }
                             });
                             if (null === sourceIndex) { // Shouldn't occur
                                 studentUnansweredCount++;
                             } else {
-                                studentResponse.push(sourceIndex.toString()+targetIndex.toString())
+                                studentResponse.push(sourceIndex.toString() + '.' + targetIndex.toString())
                                 if (sourceIndex === targetIndex) {
                                     studentCorrectResponseCount++;
                                 } else {
@@ -442,7 +471,7 @@ class Gift {
                     });
                     let correctResponse = [];
                     $.each(question.responses, function (index, response) {
-                        correctResponse.push(index.toString()+index.toString());
+                        correctResponse.push(index.toString() + '.' + index.toString());
                     });
                     data['correct_responses.0.pattern'] = correctResponse.join(',');
                     data.student_response = studentResponse.join(',');
@@ -470,6 +499,7 @@ class Gift {
 
         this.testData['cmi.core.score.raw'] = score;
         this.testData['cmi.core.lesson_status'] = passed ? this.constructor.passedStatus : this.constructor.failedStatus;
+        this.testData['cmi.core.exit'] = exit;
         this.log(this.testData);
 
         ScormUtils.multipleSetAndSave(this.testData);
@@ -523,7 +553,7 @@ class Gift {
     //static fillInType = 'fill-in'
     static matchingType = 'matching';
     //static performanceType = 'performance';
-    //static sequencingType = 'sequencing';
+    static sequencingType = 'sequencing';
     //static likertType = 'likert';
     //static numericType = 'numeric';
 
