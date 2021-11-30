@@ -2,7 +2,7 @@
 
 This is a true assertion. {T}
 
-// No order question type in GIFT; matching can be used instead.
+// No sequencing question type in GIFT; matching can be used instead.
 What is the order? {
   =This is first. -> 1
   =This is second. -> 2

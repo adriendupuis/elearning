@@ -345,12 +345,7 @@ class Gift {
         }
         this.submitted = true;
 
-        let configScores = this.getConfigurationScores();
-        this.testData = {
-            //'cmi.student_data.mastery_score': configScores.passing,// read only
-            'cmi.core.score.min': configScores.min,
-            'cmi.core.score.max': configScores.max
-        };
+        this.testData = {};
         let score = 0;
         $(this.options.questionSlideSelector + ' fieldset.question').each(function (questionIndex, questionElement) {
             let questionId = $(questionElement).attr('id');
@@ -421,7 +416,7 @@ class Gift {
                     let correctResponseCount = question.responses.length;
                     let studentCorrectResponseCount = 0;
                     let studentWrongResponseCount = 0;
-                    // From SCORM RTE Specs: "The final positioning of the elements is used to determine correctness, not the order in which they were sequenced."
+                    // From SCORM RTE specs: "The final positioning of the elements is used to determine correctness, not the order in which they were sequenced."
                     $(questionContainerElement).find('li').each(function (index) {
                         if ($(this).text() === question.responses[index][0]) {
                             studentCorrectResponseCount++;
@@ -495,16 +490,22 @@ class Gift {
             Object.assign(this.testData, prefixedData);
         }.bind(this));
 
+        let configScores = this.getConfigurationScores();
+        let scorePercent = Math.max(0, Math.min(Math.round(100 * score / configScores.max), 100));
         let passed = score >= configScores.passing;
 
-        this.testData['cmi.core.score.raw'] = score;
+        // From SCORM RTE specs: The cmi.core.score.raw must be a normalized value between 0 and 100.
+        this.testData['cmi.core.score.min'] = 0;
+        this.testData['cmi.core.score.max'] = 100;
+        this.testData['cmi.core.score.raw'] = scorePercent;
+
         this.testData['cmi.core.lesson_status'] = passed ? this.constructor.passedStatus : this.constructor.failedStatus;
         this.testData['cmi.core.exit'] = exit;
-        this.log(this.testData);
 
+        this.log(this.testData);
         ScormUtils.multipleSetAndSave(this.testData);
 
-        let feedback = Math.round(100 * score / configScores.max) + '% ' + (passed ? '≥' : '<') + ' ' + configScores.percent;
+        let feedback = scorePercent + '% ' + (passed ? '≥' : '<') + ' ' + configScores.percent;
         $('<div class="feedback ' + (passed ? 'passed' : 'failed') + '">').text(feedback).insertAfter(this.options.testSubmitButton);
         $(this.options.testSubmitButton).remove();
 
@@ -520,9 +521,10 @@ class Gift {
         if (null !== this.options.subset) {
             maxScore = this.options.subset;
         } else {
-            maxScore = this.questions.length; // means that this.selectQuestions() must have been already called.
+            maxScore = this.questions.length; // needs that this.selectQuestions() have been already called.
         }
 
+        //TODO: Get passingPercent from 'cmi.student_data.mastery_score' if available.
         if ('number' === typeof passingConf || passingConf === '' + parseFloat(passingConf)) {
             passingScore = parseFloat(this.options.passingScore);
             passingPercent = Math.round(100 * passingScore / maxScore) + '%';
