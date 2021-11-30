@@ -55,10 +55,11 @@
         margin: 0,
         plugins: [RevealMarkdown/*, RevealHighlight*/]
     }).then(function() {
+        let gift;
         if ('localhost' === document.location.hostname) {
-            let gift = new Gift('./gift.txt', {debug: true, testTime: 120});
+            gift = new Gift('./gift.txt', {debug: true, testTime: 120});
         } else {
-            let gift = new Gift('./gift.encoded.txt', {testTime: 3600, randomize: true, subset: 45, score: '67%'});
+            gift = new Gift('./gift.encoded.txt', {testTime: 3600, randomize: true, subset: 45, score: '67%'});
         }
 
         Reveal.configure({slideNumber: gift.slideNumber.bind(gift)});
