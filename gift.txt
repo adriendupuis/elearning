@@ -2,8 +2,10 @@
 
 This is a true assertion. {T}
 
+// Following title will be used as a question id after being transformer into "QOrder":
+:: Q. Order
 // No sequencing question type in GIFT; matching can be used instead.
-What is the order? {
+:: What is the order? {
   =This is first. -> 1
   =This is second. -> 2
   =This is third. -> 3

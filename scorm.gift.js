@@ -97,6 +97,7 @@ class Gift {
 
     parseQuestionPool(data) {
         let lines = data.split("\n");
+        let titleRegExp = /::([^:]+)::.*\{/;
         let questionIdMap = {};
         let questionPool = [];
         let currentQuestionCode = '';
@@ -108,7 +109,7 @@ class Gift {
             if (!cleanedLine.length) {
                 continue;
             }
-            //TODO: title syntax
+
             let openingBracketIndex = this.indexOfSpecialCharacter(cleanedLine, '{');
             if (-1 < openingBracketIndex) {
                 if (isInside) {
@@ -123,7 +124,19 @@ class Gift {
                     this.log('parse error: closing a question while none is opened.');
                 }
                 let question = this.parseQuestion(currentQuestionCode.trim());
-                question.id = 'Q' + questionPool.length;
+                let title = titleRegExp.exec(currentQuestionCode);
+                if (null !== title) {
+                    title = title[1].trim();
+                    if (ScormUtils.isCmiIdentifier(title)) {
+                        question.id = title;
+                    } else {
+                        this.log('parse notice: following title is modified to be used as a CMIIdentifier: "'+title+'"');
+                        question.id = ScormUtils.formatToCmiIdentifier(title);
+                        this.log('parse notice: …and becomes the following CMIIdentifier: "'+question.id+'"');
+                    }
+                } else {
+                    question.id = 'Q' + questionPool.length;
+                }
                 questionPool.push(question);
                 questionIdMap[question.id] = question;
                 currentQuestionCode = '';

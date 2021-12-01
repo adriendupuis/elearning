@@ -58,5 +58,12 @@ let ScormUtils = {
         seconds = Math.round(seconds * 100) / 100;
         seconds = seconds < 10 ? '0' + seconds : seconds;
         return hours + ':' + minutes + ':' + seconds;
+    },
+    // From SCORM RTE specs: CMIIdentifier is "An alphanumeric group of characters with no white space or unprintable characters in it. Maximum of 255 characters."
+    isCmiIdentifier: function (id) {
+        return /^\w{1,255}$/.test(id);
+    },
+    formatToCmiIdentifier: function (id) {
+        return id.replace(/\W+/, '').substr(0, 255);
     }
 };
