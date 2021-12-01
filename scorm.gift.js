@@ -1,6 +1,6 @@
 // Docs:
 // - https://docs.moodle.org/en/GIFT_format
-// - SCORM 1.2 Specification availalbe at https://adlnet.gov/projects/scorm/#scorm-12
+// - SCORM 1.2 Specification available at https://adlnet.gov/projects/scorm/#scorm-12
 //TODO: Separate SCORM from parser and UI for reusability
 
 class Gift {
@@ -377,7 +377,6 @@ class Gift {
     }
 
     submit(exit = this.constructor.normalExit) {
-        alert('submit!');//TMP DEBUG
         $(this.options.testSubmitButton).hide();
         clearInterval(this.testTimerId);
         if (this.submitted) {
@@ -574,7 +573,6 @@ class Gift {
         }
 
         let masteryScore = pipwerks.SCORM.get('cmi.student_data.mastery_score');
-        console.log(masteryScore);
         if (masteryScore) {
             passingConf = masteryScore + '%';
         }
