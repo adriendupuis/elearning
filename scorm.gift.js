@@ -138,6 +138,7 @@ class Gift {
                 } else {
                     question.id = 'Q' + questionPool.length;
                 }
+                question.index = questionPool.length;
                 questionPool.push(question);
                 questionIdMap[question.id] = question;
                 currentQuestionCode = '';
@@ -214,6 +215,7 @@ class Gift {
             responses.push({
                 isCorrect: isCorrectResponse,
                 index: responses.length,
+                hash: Date.now().toString(36) + Math.random().toString(36).substr(2),
                 text: part.trim()
             });
             isCorrectResponse = null;
@@ -271,7 +273,7 @@ class Gift {
                 case this.constructor.choiceType: {
                     let list = $('<ul>');
                     $.each(question.responses.shuffle(), function (index, response) {
-                        list.append($('<li><label><input type="checkbox" name="' + question.id + '" value="' + response.index + '"> ' + response.text + '</label></li>'));
+                        list.append($('<li><label><input type="checkbox" name="' + question.id + '" value="' + response.hash + '"> ' + response.text + '</label></li>'));
                     });
                     list.appendTo(questionContainerElement);
                 }
@@ -441,7 +443,7 @@ class Gift {
                     let correctResponsePattern = [];
                     let studentResponse = [];
                     $.each(question.responses, function (index, response) {
-                        let isStudentResponse = questionContainerElement.find('input[value="' + index + '"]').is(':checked');
+                        let isStudentResponse = questionContainerElement.find('input[value="' + response.hash + '"]').is(':checked');
                         if (response.isCorrect) {
                             correctResponsePattern.push(index);
                             ++correctResponseCount;
