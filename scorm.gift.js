@@ -589,7 +589,7 @@ class Gift {
         }
 
         let masteryScore = pipwerks.SCORM.get('cmi.student_data.mastery_score');
-        if (masteryScore) {
+        if (masteryScore && 'null' !== masteryScore) {
             passingConf = masteryScore + '%';
         }
         if ('number' === typeof passingConf || passingConf === '' + parseFloat(passingConf)) {
