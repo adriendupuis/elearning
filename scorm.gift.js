@@ -20,7 +20,6 @@ class Gift {
             passingScore: '100%'
         }, options);
         pipwerks.debug.isActive = this.options.debug;
-        //window.top._DEBUG = this.options.debug;
         if ('undefined' === typeof this.options.questionSlideSelector || null === this.options.questionSlideSelector) {
             this.options.questionSlideSelector = this.options.slideSelector + '.' + this.options.questionSlideClass;
         }
@@ -34,7 +33,43 @@ class Gift {
         this.firstTestSlideIndex = null;
         this.submitted = false;//Ask to the LMS
 
-        this.load(url);
+        pipwerks.SCORM.init();
+        let warningMessage = null;
+        let lessonMode = pipwerks.SCORM.get('cmi.core.lesson_mode');
+        switch (lessonMode) {
+            case 'browse':
+                warningMessage = 'Test can not be previewed.';
+                break;
+            case 'review':
+                warningMessage = 'Test can not be reviewed.';
+                break;
+            case 'normal':
+            default:
+                let completionStatus = pipwerks.SCORM.data.completionStatus;
+                if (!pipwerks.SCORM.handleCompletionStatus) {
+                    completionStatus = pipwerks.SCORM.get('cmi.core.lesson_status');
+                }
+                switch (completionStatus) {
+                    case 'passed':
+                    case 'completed':
+                    case 'failed':
+                        warningMessage = 'Test as already been attempted and can not be reviewed.';
+                        break;
+                    case 'incomplete':
+                    //TODO: Test can't be suspended. What to do is test as been interrupted? If the browser window just has been reloaded?
+                    case 'browsed':
+                    case 'not attempted':
+                    default:
+                }
+        }
+        if (null !== warningMessage) {
+            this.getSubmitButton().hide();
+            $('<section class="warning">').text(warningMessage).insertBefore(this.getSubmitSlide());
+            this.options.Reveal.sync();
+            this.options.Reveal.slide(0, 0);
+        } else {
+            this.load(url);
+        }
     }
 
     load(url) {
@@ -209,7 +244,7 @@ class Gift {
     }
 
     render() {
-        let submitSlide = $(this.options.testSubmitButton).closest(this.options.slideSelector);
+        let submitSlide = this.getSubmitSlide();
         for (let questionIndex = 0; questionIndex < this.questions.length; questionIndex++) {
             let question = this.questions[questionIndex];
             let questionContainerElement = $('<legend>').text(question.text).appendTo($('<fieldset id="' + question.id + '" class="question ' + question.type + '">')).parent();
@@ -333,7 +368,6 @@ class Gift {
     }
 
     run() {
-        pipwerks.SCORM.init();
         ScormUtils.startTime = this.sessionStartTime = new Date()
         ScormUtils.multipleSetAndSave({
             'cmi.core.exit': this.constructor.suspendExit
@@ -343,6 +377,7 @@ class Gift {
     }
 
     submit(exit = this.constructor.normalExit) {
+        alert('submit!');//TMP DEBUG
         $(this.options.testSubmitButton).hide();
         clearInterval(this.testTimerId);
         if (this.submitted) {
@@ -518,6 +553,13 @@ class Gift {
         return this;
     }
 
+    getSubmitButton() {
+        return $(this.options.testSubmitButton);
+    }
+    getSubmitSlide() {
+        return this.getSubmitButton().closest(this.options.slideSelector);
+    }
+
     getConfigurationScores() {
         let passingConf = this.options.passingScore;
         let passingScore = null;
@@ -531,12 +573,15 @@ class Gift {
             maxScore = this.options.subset;
         }
 
-        //TODO: Get passingPercent from 'cmi.student_data.mastery_score' if available.
+        let masteryScore = pipwerks.SCORM.get('cmi.student_data.mastery_score');
+        console.log(masteryScore);
+        if (masteryScore) {
+            passingConf = masteryScore + '%';
+        }
         if ('number' === typeof passingConf || passingConf === '' + parseFloat(passingConf)) {
             passingScore = parseFloat(this.options.passingScore);
             passingPercent = Math.round(100 * passingScore / maxScore) + '%';
-        }
-        if ('string' === typeof passingConf && '%' === passingConf.slice(-1)) {
+        } else if ('string' === typeof passingConf && '%' === passingConf.slice(-1)) {
             passingScore = maxScore * parseFloat(passingConf) / 100;
             passingPercent = passingConf;
         }
