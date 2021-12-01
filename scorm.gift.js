@@ -97,7 +97,7 @@ class Gift {
 
     parseQuestionPool(data) {
         let lines = data.split("\n");
-        let titleRegExp = /::([^:]+)::.*\{/;
+        let titleRegExp = /::([^:]+)::/;
         let questionIdMap = {};
         let questionPool = [];
         let currentQuestionCode = '';
@@ -134,6 +134,7 @@ class Gift {
                         question.id = ScormUtils.formatToCmiIdentifier(title);
                         this.log('parse notice: …and becomes the following CMIIdentifier: "'+question.id+'"');
                     }
+                    currentQuestionCode = currentQuestionCode.replace(titleRegExp, '').trim();
                 } else {
                     question.id = 'Q' + questionPool.length;
                 }
