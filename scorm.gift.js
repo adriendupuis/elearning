@@ -123,7 +123,7 @@ class Gift {
                 if (!isInside) {
                     this.log('parse error: closing a question while none is opened.');
                 }
-                let question = this.parseQuestion(currentQuestionCode.trim());
+                let question = {};
                 let title = titleRegExp.exec(currentQuestionCode);
                 if (null !== title) {
                     title = title[1].trim();
@@ -139,6 +139,7 @@ class Gift {
                     question.id = 'Q' + questionPool.length;
                 }
                 question.index = questionPool.length;
+                Object.assign(question, this.parseQuestion(currentQuestionCode.trim()));
                 questionPool.push(question);
                 questionIdMap[question.id] = question;
                 currentQuestionCode = '';
