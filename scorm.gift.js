@@ -20,6 +20,7 @@ class Gift {
             passingScore: '100%'
         }, options);
         pipwerks.debug.isActive = this.options.debug;
+        //window.top._DEBUG = this.options.debug;
         if ('undefined' === typeof this.options.questionSlideSelector || null === this.options.questionSlideSelector) {
             this.options.questionSlideSelector = this.options.slideSelector + '.' + this.options.questionSlideClass;
         }
@@ -196,6 +197,11 @@ class Gift {
         }
         if (Number.isInteger(this.options.subset)) {
             questions = questions.slice(0, this.options.subset);
+            if (this.options.subset > this.questionPool.length) {
+                this.log('config warning: question subset count is higher than available question count.');
+            }
+        } else if (null !== this.options.subset) {
+            this.log('config error: question subset count is not an integer.');
         }
         this.questions = questions;
 
@@ -361,7 +367,7 @@ class Gift {
                 weighting: 1
             };
             if ('2004' === pipwerks.SCORM.version) {
-                data.desscription = question.text;// SCORM 2004 2nd Edition
+                data.description = question.text;// SCORM 2004 2nd Edition
             } else if (this.options.addQuestionTextToId) {
                 data.id = (question.id + question.text.replace(/[^0-9a-zA-Z]/gi, '')).substr(0, 255);// CMIIdentifier
             }
@@ -518,10 +524,11 @@ class Gift {
         let passingPercent = null;
         let maxScore = null;
 
-        if (null !== this.options.subset) {
-            maxScore = this.options.subset;
+        if (this.questions.length) {
+            // needs that this.selectQuestions() have been already called.
+            maxScore = this.questions.length;
         } else {
-            maxScore = this.questions.length; // needs that this.selectQuestions() have been already called.
+            maxScore = this.options.subset;
         }
 
         //TODO: Get passingPercent from 'cmi.student_data.mastery_score' if available.
