@@ -126,11 +126,15 @@ class Gift {
                     currentQuestionCode += "\n" + cleanedLine;
                     continue;
                 }
-                let question = {};
+                let question = this.parseQuestion(currentQuestionCode.trim());
                 question.index = questionPool.length;
-                Object.assign(question, this.parseQuestion(currentQuestionCode.trim()));
                 if ('undefined' === typeof question.id || !question.id) {
                     question.id = 'Q' + questionPool.length;
+                }
+                while ('undefined' !== questionIdMap[question.id] && questionIdMap[question.id]) {
+                    this.log('parse error: duplicate id: "'+question.id+'"');
+                    question.id += '_';
+
                 }
                 questionPool.push(question);
                 questionIdMap[question.id] = question;
