@@ -1,6 +1,7 @@
 <!doctype html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <link href="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/dist/reveal.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/dist/theme/white.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/plugin/highlight/monokai.css" rel="stylesheet">
@@ -21,7 +22,7 @@
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/plugin/highlight/highlight.js"></script>
 
 <script src="https://cdn.jsdelivr.net/gh/pipwerks/scorm-api-wrapper@master/src/JavaScript/SCORM_API_wrapper.js"></script>
-<script>pipwerks.debug.isActive = true;</script>
+<script>pipwerks.debug.isActive = 'localhost' === document.location.hostname;</script>
 
 <script src="./utils.scorm.js"></script>
 <script src="./utils.reveal.js"></script>
