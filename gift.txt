@@ -4,7 +4,7 @@ This is a true assertion. {T}
 
 // Following title will be used as a question id after being transformer into "QOrder":
 :: Q. Order
-// No sequencing question type in GIFT; matching can be used instead.
+// No sequencing question type in GIFT; matching can be used instead with integers as targets.
 :: What is the order? {
   =This is first. -> 1
   =This is second. -> 2
@@ -14,7 +14,7 @@ This is a true assertion. {T}
 :: QOrder :://Duplicate ID
 Match the options below:
 {
-  =This is the definition of the first item. -> \{First Item\}
+  =This is the definition of the first item. -> \{First Item\}//Escaped special character
   =This corresponds to the second item. -> \{Second Item\}
   =This defines the third item. -> \{Third Item\}
 }
@@ -29,4 +29,17 @@ What are the good answers? {
   =This is a good answer.
   =This is also a good answer.
   ~This is a wrong answer.
+}
+
+//Code highlight, new line using \n, HTML to format question and response.
+What is the good <span title="JavaScript">JS</span> code when working w/ `Array`? {
+  =This is the good code:
+  ```js
+  let i \= a.indexOf(s);
+  ```
+  =This is not the good code:
+  ```php
+  $i \= array_search($s, $a);
+  ```
+  =<q>Don't comment bad code &ndash; rewrite it.</q>\n&mdash; Brian W. Kernighan & P. J. Plauger.
 }

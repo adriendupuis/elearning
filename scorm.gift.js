@@ -181,17 +181,14 @@ class Gift {
                 type: this.constructor.trueFalseType,
                 id: id,
                 title: title,
-                text: question,
-                response: 'T' === this.unescapeSpecialCharacters(responsesCode)
+                text: this.formatText(question),
+                response: 'T' === responsesCode.trim()
             };
         }
 
         /* Multiple response elements question types */
         let responseParts = responsesCode.split(/((?<!\\)[~=])/);
         responseParts.shift();
-        responseParts.forEach(function(part, index, array) {
-            array[index] = part.trim();
-        });
 
         // Matching or Sequencing
         if (-1 < responsesCode.indexOf(' -> ')) {
@@ -203,7 +200,7 @@ class Gift {
                     }
                     continue;
                 }
-                responses.push(this.unescapeSpecialCharacters(part).split(' -> '));
+                responses.push(this.formatText(part).split(' -> '));
             }
             let isSequencingType = true;
             $.each(responses, function (index, response) {
@@ -216,7 +213,7 @@ class Gift {
                 type: isSequencingType ? this.constructor.sequencingType : this.constructor.matchingType,
                 id: id,
                 title: title,
-                text: question,
+                text: this.formatText(question),
                 responses: responses
             }
         }
@@ -238,7 +235,7 @@ class Gift {
                 isCorrect: isCorrectResponse,
                 index: responses.length,
                 hash: Date.now().toString(36) + Math.random().toString(36).substr(2),
-                text: this.unescapeSpecialCharacters(part)
+                text: this.formatText(part)
             });
             isCorrectResponse = null;
         }
@@ -246,7 +243,7 @@ class Gift {
             type: this.constructor.choiceType,
             id: id,
             title: title,
-            text: question,
+            text: this.formatText(question),
             responses: responses,
         };
     }
@@ -261,8 +258,21 @@ class Gift {
         return indexOf;
     }
 
+    formatText(code) {
+        return this.unescapeSpecialCharacters(this.addNewLines(
+            code
+                .replace(/```(\w+)/g, '<pre><code class="$1">').replace('```', '</code></pre>')
+                .replace(/`(.+)`/g, '<code>$1</code>')
+
+        )).trim();
+    }
+
     unescapeSpecialCharacters(code) {
         return code.replace(/\\([~=#{}])/g, '$1');
+    }
+
+    addNewLines(code) {
+        return code.replace('\\n', "\n").replace("\n", '<br>');
     }
 
     inArray(what, array) {
@@ -291,7 +301,7 @@ class Gift {
         let submitSlide = this.getSubmitSlide();
         for (let questionIndex = 0; questionIndex < this.questions.length; questionIndex++) {
             let question = this.questions[questionIndex];
-            let questionContainerElement = $('<legend>').text(question.text).appendTo($('<fieldset id="' + question.id + '" class="question ' + question.type + '">')).parent();
+            let questionContainerElement = $('<legend>').html(question.text).appendTo($('<fieldset id="' + question.id + '" class="question ' + question.type + '">')).parent();
             switch (question.type) {
                 case this.constructor.trueFalseType: {
                     questionContainerElement.append($('<label><input type="radio" name="' + question.id + '" value="true"> True</label>'));
@@ -345,6 +355,11 @@ class Gift {
             }
             $('<section class="' + this.options.questionSlideClass + '">').append(questionContainerElement).insertBefore(submitSlide);
         }
+        this.options.Reveal.getPlugin('highlight').init(this.options.Reveal);
+        $('pre code').each(function(index, element) {
+            $(element).text($(element).text().trim());
+            this.options.Reveal.getPlugin('highlight').highlightBlock(element);
+        }.bind(this));
         this.options.Reveal.sync();
         this.options.Reveal.slide(0, 0);
 

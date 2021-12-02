@@ -57,7 +57,10 @@
         width: '100%',
         height: '100%',
         margin: 0,
-        plugins: [RevealMarkdown/*, RevealHighlight*/]
+        highlight: {
+           highlightOnLoad: false
+        },
+        plugins: [RevealMarkdown, RevealHighlight]
     }).then(function() {
         let gift;
         if ('localhost' === document.location.hostname) {
