@@ -102,7 +102,8 @@ class Gift {
         let currentQuestionCode = '';
         let isInside = false;
 
-        for (const line of lines) {
+        for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+            let line = lines[lineIndex];
             //remove comments and white spaces
             let cleanedLine = line.replace(/\/\/.*$/, '').trim();
             if (!cleanedLine.length) {
@@ -112,7 +113,8 @@ class Gift {
             let openingBracketIndex = this.indexOfSpecialCharacter(cleanedLine, '{');
             if (-1 < openingBracketIndex) {
                 if (isInside) {
-                    this.log('parse error: opening a new question while previous one is not close.');
+                    this.log('parse error @' + (lineIndex+1) + ': opening a new question while previous one is not closed.');
+                    cleanedLine = cleanedLine.slice(0, openingBracketIndex) + cleanedLine.slice(openingBracketIndex + 1);
                 }
                 isInside = true;
             }
@@ -120,9 +122,9 @@ class Gift {
             let closingBracketIndex = this.indexOfSpecialCharacter(cleanedLine, '}');
             if (-1 < closingBracketIndex) {
                 if (!isInside) {
-                    this.log('parse error: closing a question while none is opened.');
-                    currentQuestionCode = currentQuestionCode.split("\n").slice(0,-1).join("\n");
-                    cleanedLine = cleanedLine.slice(0, closingBracketIndex) + cleanedLine.slice(closingBracketIndex+1);
+                    this.log('parse error @' + (lineIndex+1) + ': closing a question while none is opened.');
+                    currentQuestionCode = currentQuestionCode.split("\n").slice(0, -1).join("\n");
+                    cleanedLine = cleanedLine.slice(0, closingBracketIndex) + cleanedLine.slice(closingBracketIndex + 1);
                     currentQuestionCode += "\n" + cleanedLine;
                     continue;
                 }
@@ -132,7 +134,7 @@ class Gift {
                     question.id = 'Q' + questionPool.length;
                 }
                 while ('undefined' !== questionIdMap[question.id] && questionIdMap[question.id]) {
-                    this.log('parse error: duplicate id: "'+question.id+'"');
+                    this.log('parse error @' + (lineIndex+1) + ': duplicate id: "' + question.id + '"');
                     question.id += '_';
 
                 }
@@ -163,9 +165,9 @@ class Gift {
             if (ScormUtils.isCmiIdentifier(title)) {
                 id = title;
             } else {
-                this.log('parse notice: following title is modified to be used as a CMIIdentifier: "'+title+'"');
+                this.log('parse notice: following title is modified to be used as a CMIIdentifier: "' + title + '"');
                 id = ScormUtils.formatToCmiIdentifier(title);
-                this.log('parse notice: …and becomes the following CMIIdentifier: "'+id+'"');
+                this.log('parse notice: …and becomes the following CMIIdentifier: "' + id + '"');
             }
             question = question.replace(titleRegExp, '').trim();
         }
@@ -589,6 +591,7 @@ class Gift {
     getSubmitButton() {
         return $(this.options.testSubmitButton);
     }
+
     getSubmitSlide() {
         return this.getSubmitButton().closest(this.options.slideSelector);
     }
