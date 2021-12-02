@@ -64,9 +64,9 @@
     }).then(function() {
         let gift;
         if ('localhost' === document.location.hostname) {
-            gift = new Gift('./gift.txt', {debug: true, testTime: 120});
+            gift = new Gift('./gift.txt', {debug: true, testTime: 360});
         } else {
-            gift = new Gift('./gift.encoded.txt', {testTime: 3600, randomize: true, subset: 45, score: '67%'});
+            gift = new Gift('./gift.encoded.txt', {testTime: 120, randomize: true, subset: 5, score: '67%'});
         }
 
         Reveal.configure({slideNumber: gift.slideNumber.bind(gift)});
