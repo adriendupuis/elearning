@@ -140,6 +140,7 @@ class Gift {
                 }
                 questionPool.push(question);
                 questionIdMap[question.id] = question;
+                //Reinitialization
                 currentQuestionCode = '';
                 isInside = false;
             }
@@ -172,7 +173,7 @@ class Gift {
             question = question.replace(titleRegExp, '').trim();
         }
 
-        let responsesCode = this.unescapeSpecialCharacters(code.substring(openingBracketIndex + 1, closingBracketIndex)).trim();
+        let responsesCode = code.substring(openingBracketIndex + 1, closingBracketIndex).trim();
 
         // True/False
         if (this.inArray(responsesCode, ['T', 'F'])) {
@@ -181,14 +182,19 @@ class Gift {
                 id: id,
                 title: title,
                 text: question,
-                response: 'T' === responsesCode
+                response: 'T' === this.unescapeSpecialCharacters(responsesCode)
             };
         }
 
+        /* Multiple response elements question types */
+        let responseParts = responsesCode.split(/((?<!\\)[~=])/);
+        responseParts.shift();
+        responseParts.forEach(function(part, index, array) {
+            array[index] = part.trim();
+        });
+
         // Matching or Sequencing
         if (-1 < responsesCode.indexOf(' -> ')) {
-            let responseParts = responsesCode.split(/([~=])/);
-            responseParts.shift();
             let responses = [];
             for (const part of responseParts) {
                 if (this.inArray(part, ['=', '~'])) {
@@ -197,7 +203,7 @@ class Gift {
                     }
                     continue;
                 }
-                responses.push(part.trim().split(' -> '));
+                responses.push(this.unescapeSpecialCharacters(part).split(' -> '));
             }
             let isSequencingType = true;
             $.each(responses, function (index, response) {
@@ -219,8 +225,6 @@ class Gift {
 
         // Multiple Choice
         let responses = [];
-        let responseParts = responsesCode.split(/([~=])/);
-        responseParts.shift();
         let isCorrectResponse = null;
         for (const part of responseParts) {
             if (this.inArray(part, ['=', '~'])) {
@@ -234,7 +238,7 @@ class Gift {
                 isCorrect: isCorrectResponse,
                 index: responses.length,
                 hash: Date.now().toString(36) + Math.random().toString(36).substr(2),
-                text: part.trim()
+                text: this.unescapeSpecialCharacters(part)
             });
             isCorrectResponse = null;
         }
