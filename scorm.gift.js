@@ -97,7 +97,6 @@ class Gift {
 
     parseQuestionPool(data) {
         let lines = data.split("\n");
-        let titleRegExp = /::([^:]+)::/;
         let questionIdMap = {};
         let questionPool = [];
         let currentQuestionCode = '';
@@ -122,24 +121,17 @@ class Gift {
             if (-1 < closingBracketIndex) {
                 if (!isInside) {
                     this.log('parse error: closing a question while none is opened.');
+                    currentQuestionCode = currentQuestionCode.split("\n").slice(0,-1).join("\n");
+                    cleanedLine = cleanedLine.slice(0, closingBracketIndex) + cleanedLine.slice(closingBracketIndex+1);
+                    currentQuestionCode += "\n" + cleanedLine;
+                    continue;
                 }
                 let question = {};
-                let title = titleRegExp.exec(currentQuestionCode);
-                if (null !== title) {
-                    title = title[1].trim();
-                    if (ScormUtils.isCmiIdentifier(title)) {
-                        question.id = title;
-                    } else {
-                        this.log('parse notice: following title is modified to be used as a CMIIdentifier: "'+title+'"');
-                        question.id = ScormUtils.formatToCmiIdentifier(title);
-                        this.log('parse notice: …and becomes the following CMIIdentifier: "'+question.id+'"');
-                    }
-                    currentQuestionCode = currentQuestionCode.replace(titleRegExp, '').trim();
-                } else {
-                    question.id = 'Q' + questionPool.length;
-                }
                 question.index = questionPool.length;
                 Object.assign(question, this.parseQuestion(currentQuestionCode.trim()));
+                if ('undefined' === typeof question.id || !question.id) {
+                    question.id = 'Q' + questionPool.length;
+                }
                 questionPool.push(question);
                 questionIdMap[question.id] = question;
                 currentQuestionCode = '';
@@ -154,17 +146,34 @@ class Gift {
     }
 
     parseQuestion(code) {
+        let titleRegExp = /::([^:]+)::/;
+
         let openingBracketIndex = this.indexOfSpecialCharacter(code, '{');
         let closingBracketIndex = this.indexOfSpecialCharacter(code, '}');
 
         let question = code.substring(0, openingBracketIndex).trim();
+        let title = null, titleMatch = titleRegExp.exec(question);
+        let id = null;
+        if (null !== titleMatch) {
+            title = titleMatch[1].trim();
+            if (ScormUtils.isCmiIdentifier(title)) {
+                id = title;
+            } else {
+                this.log('parse notice: following title is modified to be used as a CMIIdentifier: "'+title+'"');
+                id = ScormUtils.formatToCmiIdentifier(title);
+                this.log('parse notice: …and becomes the following CMIIdentifier: "'+id+'"');
+            }
+            question = question.replace(titleRegExp, '').trim();
+        }
+
         let responsesCode = code.substring(openingBracketIndex + 1, closingBracketIndex).trim();
 
         // True/False
         if (this.inArray(responsesCode, ['T', 'F'])) {
             return {
                 type: this.constructor.trueFalseType,
-                //TODO: title:
+                id: id,
+                title: title,
                 text: question,
                 response: 'T' === responsesCode
             };
@@ -193,6 +202,8 @@ class Gift {
             });
             return {
                 type: isSequencingType ? this.constructor.sequencingType : this.constructor.matchingType,
+                id: id,
+                title: title,
                 text: question,
                 responses: responses
             }
@@ -223,6 +234,8 @@ class Gift {
         }
         return {
             type: this.constructor.choiceType,
+            id: id,
+            title: title,
             text: question,
             responses: responses,
         };
