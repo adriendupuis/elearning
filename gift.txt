@@ -8,13 +8,15 @@ This is a true assertion. {T}
 :: What is the order? {
   =This is first. -> 1
   =This is second. -> 2
-  =This is third. -> 3
+  =This is third. -> 3{}//Parse error
 }
 
-Match the options below: {
-  =This is the definition of the first item. -> First Item
-  =This corresponds to the second item. -> Second Item
-  =This defines the third item. -> Third Item
+:: QOrder :://Duplicate ID
+Match the options below:
+{
+  =This is the definition of the first item. -> \{First Item\}
+  =This corresponds to the second item. -> \{Second Item\}
+  =This defines the third item. -> \{Third Item\}
 }
 
 What is the good answer? {

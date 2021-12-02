@@ -172,7 +172,7 @@ class Gift {
             question = question.replace(titleRegExp, '').trim();
         }
 
-        let responsesCode = code.substring(openingBracketIndex + 1, closingBracketIndex).trim();
+        let responsesCode = this.unescapeSpecialCharacters(code.substring(openingBracketIndex + 1, closingBracketIndex)).trim();
 
         // True/False
         if (this.inArray(responsesCode, ['T', 'F'])) {
@@ -255,6 +255,10 @@ class Gift {
             }
         }
         return indexOf;
+    }
+
+    unescapeSpecialCharacters(code) {
+        return code.replace(/\\([~=#{}])/g, '$1');
     }
 
     inArray(what, array) {
