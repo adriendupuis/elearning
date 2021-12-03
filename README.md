@@ -9,6 +9,7 @@ POCs and tools about self producing eLearning contents.
 * scorm.reveal.js: Connect a reveal.js presentation to an LMS through SCORM API.
 * scorm.gift.js: Parse a GIFT file, display its test using reveal.js, submit to LMS.
 * utils.scorm.js: Function collection to help with SCORM formats and common tasks.
+* classmarker2gift.php: Convert [ClassMarker](https://www.classmarker.com) [CSV export](https://www.classmarker.com/online-testing/manual/#exportquestions) to GIFT file.
 
 ## Utils
 
