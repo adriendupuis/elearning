@@ -264,7 +264,7 @@ class Gift {
     formatText(code) {
         return this.unescapeSpecialCharacters(this.addNewLines(
             code.trim()
-                .replace(/```(\w+)/g, '<pre><code class="$1">').replace('```', '</code></pre>')
+                .replace(/```(\w+)\n? *?/g, '<pre><code class="$1">').replace(/\n? *?```/g, '</code></pre>')
                 .replace(/`(.+)`/g, '<code>$1</code>')
 
         )).trim();
@@ -275,7 +275,7 @@ class Gift {
     }
 
     addNewLines(code) {
-        return code.replace('\\n', "\n").replace("\n", '<br>');
+        return code.replace(/\\n/g, "\n").replace(/\n/g, '<br>');
     }
 
     inArray(what, array) {
@@ -328,12 +328,12 @@ class Gift {
                 }
                     break;
                 case this.constructor.matchingType: {
-                    let sourceStack = $('<ul class="left matching-source-stack">');
+                    let sourceStack = $('<ul class="matching-source-stack">');
                     $.each(question.responses.shuffle(), function (index, response) {
                         sourceStack.append($('<li class="matching-source-item matching-source-text">' + response[0] + '</li>'));
                     });
                     sourceStack.appendTo(questionContainerElement);
-                    let targetStack = $('<ul class="right matching-target-stack">');
+                    let targetStack = $('<ul class="matching-target-stack">');
                     $.each(question.responses.shuffle().shuffle(), function (index, response) {
                         targetStack.append($('<li class="matching-target-item"><span class="matching-target-text">' + response[1] + '</span><ul class="matching-target-storage"></ul></li>'));
                     });
@@ -365,6 +365,13 @@ class Gift {
         }.bind(this));
         this.options.Reveal.sync();
         this.options.Reveal.slide(0, 0);
+        $(this.options.slideSelector).each(function() {
+            let zoom = 1.0;
+            while ($(this).height() > $('body').height() && zoom > 0.35) {
+                zoom-=0.05;
+                $(this).css('zoom', zoom);
+            }
+        });
 
         this.firstTestSlideIndex = $(this.options.slideSelector).index($(this.options.questionSlideSelector));
 
@@ -465,7 +472,7 @@ class Gift {
             if ('2004' === pipwerks.SCORM.version) {
                 data.description = question.text;// SCORM 2004 2nd Edition
             } else if (this.options.addQuestionTextToId) {
-                data.id = (question.id + question.text.replace(/[^0-9a-zA-Z]/gi, '')).substr(0, 255);// CMIIdentifier
+                data.id = (question.id + question.text.replace(/[^0-9a-zA-Z]/g, '')).substr(0, 255);// CMIIdentifier
             }
             data.result = this.constructor.neutralResult;
             switch (question.type) {
