@@ -43,3 +43,9 @@ What is the good <span title="JavaScript">JS</span> code when working w/ `Array`
   ```
   =<q>Don't comment bad code &ndash; rewrite it.</q>\n&mdash; Brian W. Kernighan & P. J. Plauger.
 }
+
+What is the dictionary wiki? {
+    ~https://wikipedia.org/
+    =https://wiktionary.org/
+    ~https://wikimedia.org/
+}

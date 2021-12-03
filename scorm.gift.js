@@ -76,6 +76,9 @@ class Gift {
         $.ajax({
             url: url,
             success: this.parseAndRun.bind(this),
+            error: function(jqXHR, textStatus, errorThrown) {
+                this.log('resource error: ' + errorThrown);
+            }.bind(this),
             dataType: 'text'
         });
     }
@@ -105,7 +108,7 @@ class Gift {
         for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
             let line = lines[lineIndex];
             //remove comments and white spaces
-            let cleanedLine = line.replace(/\/\/.*$/, '').trim();
+            let cleanedLine = line.replace(/(?<!https?:)\/\/.*$/, '').trim();
             if (!cleanedLine.length) {
                 continue;
             }
@@ -260,7 +263,7 @@ class Gift {
 
     formatText(code) {
         return this.unescapeSpecialCharacters(this.addNewLines(
-            code
+            code.trim()
                 .replace(/```(\w+)/g, '<pre><code class="$1">').replace('```', '</code></pre>')
                 .replace(/`(.+)`/g, '<code>$1</code>')
 
