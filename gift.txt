@@ -25,10 +25,14 @@ What is the good answer? {
   ~This is also a wrong answer.
 }
 
-What are the good answers? {
-  =This is a good answer.
-  =This is also a good answer.
-  ~This is a wrong answer.
+What are
+the good answers? {
+  =This is
+  a good answer.
+  =This is
+  also a good answer.
+  ~This is
+  a wrong answer.
 }
 
 //Code highlight, new line using \n, HTML to format question and response.
