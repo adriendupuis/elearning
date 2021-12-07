@@ -17,7 +17,8 @@ class Gift {
             testSubmitButton: 'section button',
             testTime: null,
             timerContainer: '.timer',
-            passingScore: '100%'
+            passingScore: '100%',
+            parseOnlyStandardComment: false
         }, options);
         pipwerks.debug.isActive = this.options.debug;
         if ('undefined' === typeof this.options.questionSlideSelector || null === this.options.questionSlideSelector) {
@@ -107,8 +108,13 @@ class Gift {
 
         for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
             let line = lines[lineIndex];
+            let cleanedLine = line;
             //remove comments and white spaces
-            let cleanedLine = line.replace(/(?<!https?:)\/\/.*$/, '').trim();
+            if (this.options.parseOnlyStandardComment) {
+                cleanedLine = line.replace(/^\/\/.*$/, '').trim();
+            } else {
+                cleanedLine = line.replace(/(?<!https?:)\/\/.*$/, '').trim();
+            }
             if (!cleanedLine.length) {
                 continue;
             }

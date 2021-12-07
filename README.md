@@ -34,7 +34,7 @@ The test, those slides, will be added just before the slide containing the submi
 
 ## GIFT Parser
 
-New lines in question or response will be kept and converted to HTML new lines `<br>`.
+New lines in question or response will be kept and converted to HTML new lines `<br>`. A new line can also be inserted using `\n` or  `<br>`.
 
 The GIFT parser use question title (`::title::`) as question ID.
 If no title is provided, it uses question's index (its zero-based index in the question pool) prefixed with 'Q' (ex: 'Q123').
