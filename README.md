@@ -7,7 +7,7 @@ POCs and tools about self producing eLearning contents.
 * scorm.sh: Archive (.zip) a set of resources into a SCORM 1.2 package (SCO).
   - scorm.all.sh: Create all DEMO SCOs by just running `./scorm.all.sh;`.
 * scorm.reveal.js: Connect a reveal.js presentation to an LMS through SCORM API.
-* scorm.gift.js: Parse a GIFT file, display its test using reveal.js, submit to LMS using SCORM API.
+* gift.js: Parse a GIFT file, display its test using reveal.js, submit to LMS using SCORM API.
 * utils.scorm.js: Function collection to help with SCORM formats and common tasks.
 * classmarker2gift.php: Convert [ClassMarker](https://www.classmarker.com) [CSV export](https://www.classmarker.com/online-testing/manual/#exportquestions) to GIFT file.
 
