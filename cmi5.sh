@@ -60,6 +60,6 @@ done
 cd $packageRoot;
 zip -9 -r ../$outputFile .;
 cd -;
-#rm -rf $packageRoot;
+rm -rf $packageRoot;
 
 exit 0;
