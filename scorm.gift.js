@@ -89,4 +89,7 @@ class ScormGift extends GiftPlugin {
         console.log(testData);
         ScormUtils.multipleSetAndSave(testData);
     }
+
+    static normalExit = ScormUtils.normalExit;
+    static timeOutExit = ScormUtils.timeOutExit;
 }

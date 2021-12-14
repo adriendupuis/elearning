@@ -400,7 +400,6 @@ class MatchingQuestion extends Question {
                     let correct = false;
                     let sourceIndex = null, targetIndex = null;
                     $.each(this.responses, function (index, response) {
-                        console.log(source, target, response);
                         if (source === response[0]) {
                             sourceIndex = index;
                         }

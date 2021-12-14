@@ -118,7 +118,8 @@ class Gift {
                 }
                 let question = GiftQuestion.parse(currentQuestionCode);
                 question.setIndex(questionPool.length);
-                if (question.getTitle() && !question.getId()) {
+                //TODO: create ID from title when cmi5
+                if (ScormUtils && question.getTitle() && !question.getId()) {
                     if (ScormUtils.isCmiIdentifier(question.getTitle())) {
                         question.setId(question.getTitle());
                     } else {
@@ -248,7 +249,7 @@ class Gift {
 
         // Handle timeout
         if (0 >= timeLeft) {
-            this.submit(ScormUtils.timeOutExit);
+            this.submit(this.options.Plugin.constructor.timeOutExit);
         }
     }
 
@@ -260,7 +261,7 @@ class Gift {
         return this;
     }
 
-    submit(exit = ScormUtils.normalExit) {
+    submit(exit = this.options.Plugin.constructor.normalExit) {
         $(this.options.testSubmitButton).hide();
         clearInterval(this.testTimerId);
         if (this.submitted) {
@@ -334,6 +335,9 @@ class Gift {
 }
 
 class GiftPlugin {
+    static normalExit = 'normal';
+    static timeOutExit = 'timeout';
+
     setDebug(debug) {
     }
 
