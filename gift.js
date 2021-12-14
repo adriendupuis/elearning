@@ -303,15 +303,19 @@ class Gift {
 
     getConfigurationScores() {
         let passingConf = this.options.passingScore;
-        let passingScore = null;
-        let passingPercent = null;
+        let passingScore = null;// 0 - 1
+        let passingPercent = null;// 0% - 100%
 
+        // The score threshold hard coded into the package could be override live from LMS
         let masteryScore = this.options.Plugin.getMasteryScore();
         if (masteryScore && 'null' !== masteryScore) {
+            //TODO: Exact format?
+            //TODO: SCORM vs cmi5
             passingConf = masteryScore + '%';
         }
+
         if ('number' === typeof passingConf || passingConf === '' + parseFloat(passingConf)) {
-            passingScore = parseFloat(this.options.passingScore);
+            passingScore = parseFloat(passingConf);
             passingPercent = Math.round(100 * passingScore) + '%';
         } else if ('string' === typeof passingConf && '%' === passingConf.slice(-1)) {
             passingScore = parseFloat(passingConf) / 100;
