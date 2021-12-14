@@ -119,7 +119,7 @@ class Gift {
                 let question = GiftQuestion.parse(currentQuestionCode);
                 question.setIndex(questionPool.length);
                 //TODO: create ID from title when cmi5
-                if (ScormUtils && question.getTitle() && !question.getId()) {
+                if ('undefined' !== typeof ScormUtils && question.getTitle() && !question.getId()) {
                     if (ScormUtils.isCmiIdentifier(question.getTitle())) {
                         question.setId(question.getTitle());
                     } else {
