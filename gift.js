@@ -28,7 +28,6 @@ class Gift {
         this.questionIdMap = {};
         this.questionPool = [];
         this.questions = [];
-        this.sessionStartTime = null;
         this.testStartTime = null;
         this.testTimerId = null;
         this.firstTestSlideIndex = null;

@@ -1,6 +1,8 @@
 class ScormGift extends GiftPlugin {
+    debug = false;
+
     setDebug(debug) {
-        pipwerks.debug.isActive = debug;
+        pipwerks.debug.isActive = this.debug = debug;
     }
 
     init() {
@@ -48,7 +50,7 @@ class ScormGift extends GiftPlugin {
     }
 
     run() {
-        ScormUtils.startTime = this.sessionStartTime = new Date()
+        ScormUtils.startTime = new Date()
         ScormUtils.multipleSetAndSave({
             'cmi.core.exit': ScormUtils.suspendExit
         });
@@ -84,9 +86,12 @@ class ScormGift extends GiftPlugin {
         testData['cmi.core.score.raw'] = Math.max(0, Math.min(100 * test.score, 100));
 
         testData['cmi.core.lesson_status'] = test.passed ? ScormUtils.passedStatus : ScormUtils.failedStatus;
+        testData['cmi.core.session_time'] = ScormUtils.getCmiTimespan(new Date().getTime() - ScormUtils.startTime.getTime());
         testData['cmi.core.exit'] = exitType;
 
-        console.log(testData);
+        if (this.debug) {
+            console.log(testData);
+        }
         ScormUtils.multipleSetAndSave(testData);
     }
 
