@@ -1,7 +1,6 @@
 // Docs:
 // - https://docs.moodle.org/en/GIFT_format
 // - SCORM 1.2 Specification available at https://adlnet.gov/projects/scorm/#scorm-12
-//TODO: Separate SCORM from parser and UI for reusability
 
 class Gift {
     constructor(url, options = {}) {
@@ -11,6 +10,7 @@ class Gift {
             randomize: false,
             addQuestionTextToId: false,
             Reveal: Reveal,
+            Plugin: null,
             slideSelector: '.reveal > .slides > section',
             questionSlideClass: 'test',
             questionSlideSelector: null,
@@ -20,7 +20,7 @@ class Gift {
             passingScore: '100%',
             parseOnlyStandardComment: false
         }, options);
-        pipwerks.debug.isActive = this.options.debug;
+        this.options.Plugin.setDebug(this.options.debug);
         if ('undefined' === typeof this.options.questionSlideSelector || null === this.options.questionSlideSelector) {
             this.options.questionSlideSelector = this.options.slideSelector + '.' + this.options.questionSlideClass;
         }
@@ -34,34 +34,13 @@ class Gift {
         this.firstTestSlideIndex = null;
         this.submitted = false;//Ask to the LMS
 
-        pipwerks.SCORM.init();
         let warningMessage = null;
-        let lessonMode = pipwerks.SCORM.get('cmi.core.lesson_mode');
-        switch (lessonMode) {
-            case 'browse':
-                warningMessage = 'Test can not be previewed.';
-                break;
-            case 'review':
-                warningMessage = 'Test can not be reviewed.';
-                break;
-            case 'normal':
-            default:
-                let completionStatus = pipwerks.SCORM.data.completionStatus;
-                if (!pipwerks.SCORM.handleCompletionStatus) {
-                    completionStatus = pipwerks.SCORM.get('cmi.core.lesson_status');
-                }
-                switch (completionStatus) {
-                    case 'passed':
-                    case 'completed':
-                    case 'failed':
-                        warningMessage = 'Test as already been attempted and can not be reviewed.';
-                        break;
-                    case 'incomplete':
-                    //TODO: Test can't be suspended. What to do is test as been interrupted? If the browser window just has been reloaded?
-                    case 'browsed':
-                    case 'not attempted':
-                    default:
-                }
+        if (null !== this.options.Plugin && 'function' === typeof this.options.Plugin.init) {
+            try {
+                this.options.Plugin.init();
+            } catch (e) {
+                warningMessage = e.message;
+            }
         }
         if (null !== warningMessage) {
             this.getSubmitButton().hide();
@@ -77,7 +56,7 @@ class Gift {
         $.ajax({
             url: url,
             success: this.parseAndRun.bind(this),
-            error: function(jqXHR, textStatus, errorThrown) {
+            error: function (jqXHR, textStatus, errorThrown) {
                 this.log('resource error: ' + errorThrown);
             }.bind(this),
             dataType: 'text'
@@ -119,36 +98,45 @@ class Gift {
                 continue;
             }
 
-            let openingBracketIndex = this.indexOfSpecialCharacter(cleanedLine, '{');
+            let openingBracketIndex = GiftQuestion.indexOfSpecialCharacter(cleanedLine, '{');
             if (-1 < openingBracketIndex) {
                 if (isInside) {
-                    this.log('parse error @' + (lineIndex+1) + ': opening a new question while previous one is not closed.');
+                    this.log('parse error @' + (lineIndex + 1) + ': opening a new question while previous one is not closed.');
                     cleanedLine = cleanedLine.slice(0, openingBracketIndex) + cleanedLine.slice(openingBracketIndex + 1);
                 }
                 isInside = true;
             }
             currentQuestionCode += "\n" + cleanedLine;
-            let closingBracketIndex = this.indexOfSpecialCharacter(cleanedLine, '}');
+            let closingBracketIndex = GiftQuestion.indexOfSpecialCharacter(cleanedLine, '}');
             if (-1 < closingBracketIndex) {
                 if (!isInside) {
-                    this.log('parse error @' + (lineIndex+1) + ': closing a question while none is opened.');
+                    this.log('parse error @' + (lineIndex + 1) + ': closing a question while none is opened.');
                     currentQuestionCode = currentQuestionCode.split("\n").slice(0, -1).join("\n");
                     cleanedLine = cleanedLine.slice(0, closingBracketIndex) + cleanedLine.slice(closingBracketIndex + 1);
                     currentQuestionCode += "\n" + cleanedLine;
                     continue;
                 }
-                let question = this.parseQuestion(currentQuestionCode.trim());
-                question.index = questionPool.length;
-                if ('undefined' === typeof question.id || !question.id) {
-                    question.id = 'Q' + questionPool.length;
+                let question = GiftQuestion.parse(currentQuestionCode);
+                question.setIndex(questionPool.length);
+                if (question.getTitle() && !question.getId()) {
+                    if (ScormUtils.isCmiIdentifier(question.getTitle())) {
+                        question.setId(question.getTitle());
+                    } else {
+                        this.log('parse notice: following title is modified to be used as a CMIIdentifier: "' + question.getTitle() + '"');
+                        question.setId(ScormUtils.formatToCmiIdentifier(question.getTitle()));
+                        this.log('parse notice: …and becomes the following CMIIdentifier: "' + question.getId() + '"');
+                    }
+                }
+                if (!question.getId()) {
+                    question.setId('Q' + question.getIndex());
                 }
                 while ('undefined' !== questionIdMap[question.id] && questionIdMap[question.id]) {
-                    this.log('parse error @' + (lineIndex+1) + ': duplicate id: "' + question.id + '"');
-                    question.id += '_';
+                    this.log('parse error @' + (lineIndex + 1) + ': duplicate id: "' + question.id + '"');
+                    question.setId(question.getId() + '_');
 
                 }
                 questionPool.push(question);
-                questionIdMap[question.id] = question;
+                questionIdMap[question.getId()] = question;
                 //Reinitialization
                 currentQuestionCode = '';
                 isInside = false;
@@ -159,133 +147,6 @@ class Gift {
         this.questionIdMap = questionIdMap;
 
         return this;
-    }
-
-    parseQuestion(code) {
-        let titleRegExp = /::([^:]+)::/;
-
-        let openingBracketIndex = this.indexOfSpecialCharacter(code, '{');
-        let closingBracketIndex = this.indexOfSpecialCharacter(code, '}');
-
-        let question = code.substring(0, openingBracketIndex).trim();
-        let title = null, titleMatch = titleRegExp.exec(question);
-        let id = null;
-        if (null !== titleMatch) {
-            title = titleMatch[1].trim();
-            if (ScormUtils.isCmiIdentifier(title)) {
-                id = title;
-            } else {
-                this.log('parse notice: following title is modified to be used as a CMIIdentifier: "' + title + '"');
-                id = ScormUtils.formatToCmiIdentifier(title);
-                this.log('parse notice: …and becomes the following CMIIdentifier: "' + id + '"');
-            }
-            question = question.replace(titleRegExp, '').trim();
-        }
-
-        let responsesCode = code.substring(openingBracketIndex + 1, closingBracketIndex).trim();
-
-        // True/False
-        if (this.inArray(responsesCode, ['T', 'F'])) {
-            return {
-                type: this.constructor.trueFalseType,
-                id: id,
-                title: title,
-                text: this.formatText(question),
-                response: 'T' === responsesCode.trim()
-            };
-        }
-
-        /* Multiple response elements question types */
-        let responseParts = responsesCode.split(/((?<!\\)[~=])/);
-        responseParts.shift();
-
-        // Matching or Sequencing
-        if (-1 < responsesCode.indexOf(' -> ')) {
-            let responses = [];
-            for (const part of responseParts) {
-                if (this.inArray(part, ['=', '~'])) {
-                    if ('~' === part) {
-                        this.log('parse error: there is no wrong response in matching question type.')
-                    }
-                    continue;
-                }
-                responses.push(this.formatText(part).split(' -> '));
-            }
-            let isSequencingType = true;
-            $.each(responses, function (index, response) {
-                if (!/^[0-9]+$/.test(response[1])) {
-                    isSequencingType = false;
-                    return false;
-                }
-            });
-            return {
-                type: isSequencingType ? this.constructor.sequencingType : this.constructor.matchingType,
-                id: id,
-                title: title,
-                text: this.formatText(question),
-                responses: responses
-            }
-        }
-
-        //TODO: other question types
-
-        // Multiple Choice
-        let responses = [];
-        let isCorrectResponse = null;
-        for (const part of responseParts) {
-            if (this.inArray(part, ['=', '~'])) {
-                isCorrectResponse = '=' === part;
-                continue;
-            }
-            if (null === isCorrectResponse) {
-                this.log('parse error: response is not correct nor wrong');
-            }
-            responses.push({
-                isCorrect: isCorrectResponse,
-                index: responses.length,
-                hash: Date.now().toString(36) + Math.random().toString(36).substr(2),
-                text: this.formatText(part)
-            });
-            isCorrectResponse = null;
-        }
-        return {
-            type: this.constructor.choiceType,
-            id: id,
-            title: title,
-            text: this.formatText(question),
-            responses: responses,
-        };
-    }
-
-    indexOfSpecialCharacter(line, character, index = 0) {
-        let indexOf = line.indexOf(character, index);
-        if (0 < indexOf) {
-            if ('\\' === line[indexOf - 1]) {
-                indexOf = this.indexOfSpecialCharacter(line, character, indexOf + 1);
-            }
-        }
-        return indexOf;
-    }
-
-    formatText(code) {
-        return this.unescapeSpecialCharacters(this.addNewLines(
-            code.trim()
-                .replace(/```(\w+)\n? *?/g, '<pre><code class="$1">').replace(/\n? *?```/g, '</code></pre>')
-                .replace(/`(.+)`/g, '<code>$1</code>')
-
-        )).trim();
-    }
-
-    unescapeSpecialCharacters(code) {
-        return code.replace(/\\([~=#{}])/g, '$1');
-    }
-
-    addNewLines(code) {
-        return code.replace(/\\n/g, "\n").replace(/\n/g, '<br>');
-    }
-
-    inArray(what, array) {
-        return -1 < $.inArray(what, array);
     }
 
     selectQuestions() {
@@ -310,71 +171,22 @@ class Gift {
         let submitSlide = this.getSubmitSlide();
         for (let questionIndex = 0; questionIndex < this.questions.length; questionIndex++) {
             let question = this.questions[questionIndex];
-            let questionContainerElement = $('<legend>').html(question.text).appendTo($('<fieldset id="' + question.id + '" class="question ' + question.type + '">')).parent();
-            switch (question.type) {
-                case this.constructor.trueFalseType: {
-                    questionContainerElement.append($('<label><input type="radio" name="' + question.id + '" value="true"> True</label>'));
-                    questionContainerElement.append($('<label><input type="radio" name="' + question.id + '" value="false"> False</label>'));
-                }
-                    break;
-                case this.constructor.choiceType: {
-                    let list = $('<ul>');
-                    $.each(question.responses.shuffle(), function (index, response) {
-                        list.append($('<li><label><input type="checkbox" name="' + question.id + '" value="' + response.hash + '"> ' + response.text + '</label></li>'));
-                    });
-                    list.appendTo(questionContainerElement);
-                }
-                    break;
-                case this.constructor.sequencingType: {
-                    let list = $('<ul>');
-                    $.each(question.responses.shuffle(), function (index, response) {
-                        list.append($('<li>' + response[0] + '</li>'));
-                    });
-                    list.appendTo(questionContainerElement).sortable();
-                }
-                    break;
-                case this.constructor.matchingType: {
-                    let sourceStack = $('<ul class="matching-source-stack">');
-                    $.each(question.responses.shuffle(), function (index, response) {
-                        sourceStack.append($('<li class="matching-source-item matching-source-text">' + response[0] + '</li>'));
-                    });
-                    sourceStack.appendTo(questionContainerElement);
-                    let targetStack = $('<ul class="matching-target-stack">');
-                    $.each(question.responses.shuffle().shuffle(), function (index, response) {
-                        targetStack.append($('<li class="matching-target-item"><span class="matching-target-text">' + response[1] + '</span><ul class="matching-target-storage"></ul></li>'));
-                    });
-                    targetStack.appendTo(questionContainerElement);
-                    questionContainerElement.matching({
-                        drop: function (event, ui) {
-                            let sourceStack = questionContainerElement.find('.matching-source-stack');
-                            let targetStack = questionContainerElement.find('.matching-target-stack');
-                            let sourceStackHeight = sourceStack.height();
-                            let targetStackHeight = targetStack.height();
-                            if (sourceStackHeight < targetStackHeight) {
-                                sourceStack.height(targetStackHeight);
-                            } else if (sourceStackHeight > targetStackHeight) {
-                                targetStack.height(sourceStackHeight);
-                            }
-                        }
-                    });
-                }
-                    break;
-                default:
-                    this.log('runtime error: unknown question type: '.question.type);
-            }
+            let questionContainerElement = $('<legend>').html(question.text).appendTo($('<fieldset id="' + question.getId() + '" class="question ' + question.getType() + '">')).parent();
+            question.render(questionContainerElement);
             $('<section class="' + this.options.questionSlideClass + '">').append(questionContainerElement).insertBefore(submitSlide);
         }
+
         this.options.Reveal.getPlugin('highlight').init(this.options.Reveal);
-        $('pre code').each(function(index, element) {
+        $('pre code').each(function (index, element) {
             $(element).text($(element).text().trim());
             this.options.Reveal.getPlugin('highlight').highlightBlock(element);
         }.bind(this));
         this.options.Reveal.sync();
         this.options.Reveal.slide(0, 0);
-        $(this.options.slideSelector).each(function() {
+        $(this.options.slideSelector).each(function () {
             let zoom = 1.0;
             while ($(this).height() > $('body').height() && zoom > 0.35) {
-                zoom-=0.05;
+                zoom -= 0.05;
                 $(this).css('zoom', zoom);
             }
         });
@@ -401,15 +213,13 @@ class Gift {
                     this.runTestTimer();
                     this.testTimerId = setInterval(this.runTestTimer.bind(this), 1000);
                 }
-                currentSlide.data('start-time', new Date());
+                let currentQuestion = this.questionIdMap[currentSlide.find('.question').attr('id')];
+                currentQuestion.start();
             }
             let previousSlide = $(event.previousSlide);
             if (previousSlide.is(this.options.questionSlideSelector)) {
-                let latency = new Date().getTime() - previousSlide.data('start-time').getTime();
-                if (previousSlide.data('latency')) {
-                    latency += previousSlide.data('latency');
-                }
-                previousSlide.data('latency', latency);
+                let previousQuestion = this.questionIdMap[previousSlide.find('.question').attr('id')];
+                previousQuestion.stop();
             }
         }.bind(this));
 
@@ -438,20 +248,19 @@ class Gift {
 
         // Handle timeout
         if (0 >= timeLeft) {
-            this.submit(this.constructor.timeOutExit);
+            this.submit(ScormUtils.timeOutExit);
         }
     }
 
     run() {
-        ScormUtils.startTime = this.sessionStartTime = new Date()
-        ScormUtils.multipleSetAndSave({
-            'cmi.core.exit': this.constructor.suspendExit
-        });
+        if (this.options.Plugin && this.options.Plugin.run) {
+            this.options.Plugin.run();
+        }
 
         return this;
     }
 
-    submit(exit = this.constructor.normalExit) {
+    submit(exit = ScormUtils.normalExit) {
         $(this.options.testSubmitButton).hide();
         clearInterval(this.testTimerId);
         if (this.submitted) {
@@ -460,166 +269,23 @@ class Gift {
         }
         this.submitted = true;
 
-        this.testData = {};
-        let score = 0;
-        $(this.options.questionSlideSelector + ' fieldset.question').each(function (questionIndex, questionElement) {
-            let questionId = $(questionElement).attr('id');
-            let question = this.questionIdMap[questionId];
-            let questionContainerElement = $('#' + questionId);
-            let questionSlide = questionContainerElement.closest(this.options.questionSlideSelector);
-            let keyPrefix = 'cmi.interactions.' + questionIndex + '.';
-            let data = {
-                id: question.id,
-                type: question.type,
-                time: ScormUtils.getCmiTime(questionSlide.data('start-time')),
-                latency: ScormUtils.getCmiTimespan(questionSlide.data('latency')),
-                weighting: 1
-            };
-            if ('2004' === pipwerks.SCORM.version) {
-                data.description = question.text;// SCORM 2004 2nd Edition
-            } else if (this.options.addQuestionTextToId) {
-                data.id = (question.id + question.text.replace(/[^0-9a-zA-Z]/g, '')).substr(0, 255);// CMIIdentifier
-            }
-            data.result = this.constructor.neutralResult;
-            switch (question.type) {
-                case this.constructor.trueFalseType: {
-                    let correctResponse = question.response ? 'true' : 'false';
-                    data['correct_responses.0.pattern'] = question.response ? '1' : '0';
-                    let studentResponse = questionContainerElement.find('input:checked').val();
-                    if (this.inArray(studentResponse, ['true', 'false'])) {
-                        data.student_response = 'true' === studentResponse ? '1' : '0';
-                        data.result = correctResponse === studentResponse ? this.constructor.correctResult : this.constructor.wrongResult;
-                        score += correctResponse === studentResponse ? 1 : 0;
-                    } else if (studentResponse) {
-                        data.result = this.constructor.unanticipatedResult;
-                    }
-                }
-                    break;
-                case this.constructor.choiceType: {
-                    let correctResponseCount = 0;
-                    let studentCorrectResponseCount = 0;
-                    let studentWrongResponseCount = 0;
-                    let correctResponsePattern = [];
-                    let studentResponse = [];
-                    $.each(question.responses, function (index, response) {
-                        let isStudentResponse = questionContainerElement.find('input[value="' + response.hash + '"]').is(':checked');
-                        if (response.isCorrect) {
-                            correctResponsePattern.push(index);
-                            ++correctResponseCount;
-                            if (isStudentResponse) {
-                                studentResponse.push(index);
-                                ++studentCorrectResponseCount;
-                            }
-                        } else if (isStudentResponse) {
-                            studentResponse.push(index);
-                            ++studentWrongResponseCount;
-                        }
-                    });
-                    data['correct_responses.0.pattern'] = correctResponsePattern.join(',');
-                    data.student_response = studentResponse.join(',');
-                    if (0 < studentCorrectResponseCount - studentWrongResponseCount) {
-                        data.result = this.constructor.correctResult;
-                    } else if (0 > studentCorrectResponseCount - studentWrongResponseCount) {
-                        data.result = this.constructor.wrongResult;
-                    } else {
-                        data.result = this.constructor.neutralResult;
-                    }
-                    score += Math.max(0, studentCorrectResponseCount - studentWrongResponseCount) / correctResponseCount;
-                }
-                    break;
-                case this.constructor.sequencingType: {
-                    let correctResponseCount = question.responses.length;
-                    let studentCorrectResponseCount = 0;
-                    let studentWrongResponseCount = 0;
-                    // From SCORM RTE specs: "The final positioning of the elements is used to determine correctness, not the order in which they were sequenced."
-                    $(questionContainerElement).find('li').each(function (index) {
-                        if ($(this).text() === question.responses[index][0]) {
-                            studentCorrectResponseCount++;
-                        } else {
-                            studentWrongResponseCount++;
-                        }
-                    });
-                    score += studentCorrectResponseCount / correctResponseCount;
-                }
-                    break;
-                case this.constructor.matchingType: {
-                    let correctResponseCount = question.responses.length;
-                    let studentCorrectResponseCount = 0;
-                    let studentWrongResponseCount = 0;
-                    let studentUnansweredCount = 0;
-                    let studentResponse = [];
-                    questionContainerElement.find('.matching-target-item').each(function () {
-                        let source = $(this).find('.matching-target-storage .matching-source-text').text();
-                        let target = $(this).find('.matching-target-text').text();
-                        if (!source.length) {
-                            studentUnansweredCount++;
-                        } else {
-                            let correct = false;
-                            let sourceIndex = null, targetIndex = null;
-                            $.each(question.responses, function (index, response) {
-                                if (source === response[0]) {
-                                    sourceIndex = index;
-                                }
-                                if (target === response[1]) {
-                                    targetIndex = index;
-                                }
-                                if (null !== sourceIndex && null !== targetIndex) {
-                                    return false;
-                                }
-                            });
-                            if (null === sourceIndex) { // Shouldn't occur
-                                studentUnansweredCount++;
-                            } else {
-                                studentResponse.push(sourceIndex.toString() + '.' + targetIndex.toString())
-                                if (sourceIndex === targetIndex) {
-                                    studentCorrectResponseCount++;
-                                } else {
-                                    studentWrongResponseCount++;
-                                }
-                            }
-                        }
-                    });
-                    let correctResponse = [];
-                    $.each(question.responses, function (index, response) {
-                        correctResponse.push(index.toString() + '.' + index.toString());
-                    });
-                    data['correct_responses.0.pattern'] = correctResponse.join(',');
-                    data.student_response = studentResponse.join(',');
-                    if (0 < studentCorrectResponseCount - studentWrongResponseCount) {
-                        data.result = this.constructor.correctResult;
-                    } else if (0 > studentCorrectResponseCount - studentWrongResponseCount) {
-                        data.result = this.constructor.wrongResult;
-                    } else {
-                        data.result = this.constructor.neutralResult;
-                    }
-                    score += Math.max(0, studentCorrectResponseCount - studentWrongResponseCount) / correctResponseCount;
-                }
-                    break;
-                default:
-                    this.log('runtime error: unknown question type: '.question.type);
-            }
-            let prefixedData = {};
-            for (const key in data) {
-                prefixedData[keyPrefix + key] = data[key];
-            }
-            Object.assign(this.testData, prefixedData);
+        let score = 0, weight = 0;
+        $.each(this.questions, function (questionIndex, question) {
+            score += question.getWeight() * question.getScore();
+            weight += question.getWeight();
         }.bind(this));
-
+        score /= weight;
         let configScores = this.getConfigurationScores();
-        let scorePercent = Math.max(0, Math.min(Math.round(100 * score / configScores.max), 100));
         let passed = score >= configScores.passing;
 
-        // From SCORM RTE specs: The cmi.core.score.raw must be a normalized value between 0 and 100.
-        this.testData['cmi.core.score.min'] = 0;
-        this.testData['cmi.core.score.max'] = 100;
-        this.testData['cmi.core.score.raw'] = scorePercent;
+        this.options.Plugin.submit({
+            id: 'GIFT',
+            questions: this.questions,
+            score: score,
+            passed: passed
+        }, exit);
 
-        this.testData['cmi.core.lesson_status'] = passed ? this.constructor.passedStatus : this.constructor.failedStatus;
-        this.testData['cmi.core.exit'] = exit;
-
-        this.log(this.testData);
-        ScormUtils.multipleSetAndSave(this.testData);
-
+        let scorePercent = Math.max(0, Math.min(Math.round(100 * score), 100));
         let feedback = scorePercent + '% ' + (passed ? '≥' : '<') + ' ' + configScores.percent;
         $('<div class="feedback ' + (passed ? 'passed' : 'failed') + '">').text(feedback).insertAfter(this.options.testSubmitButton);
         $(this.options.testSubmitButton).remove();
@@ -639,31 +305,23 @@ class Gift {
         let passingConf = this.options.passingScore;
         let passingScore = null;
         let passingPercent = null;
-        let maxScore = null;
 
-        if (this.questions.length) {
-            // needs that this.selectQuestions() have been already called.
-            maxScore = this.questions.length;
-        } else {
-            maxScore = this.options.subset;
-        }
-
-        let masteryScore = pipwerks.SCORM.get('cmi.student_data.mastery_score');
+        let masteryScore = this.options.Plugin.getMasteryScore();
         if (masteryScore && 'null' !== masteryScore) {
             passingConf = masteryScore + '%';
         }
         if ('number' === typeof passingConf || passingConf === '' + parseFloat(passingConf)) {
             passingScore = parseFloat(this.options.passingScore);
-            passingPercent = Math.round(100 * passingScore / maxScore) + '%';
+            passingPercent = Math.round(100 * passingScore) + '%';
         } else if ('string' === typeof passingConf && '%' === passingConf.slice(-1)) {
-            passingScore = maxScore * parseFloat(passingConf) / 100;
+            passingScore = parseFloat(passingConf) / 100;
             passingPercent = passingConf;
         }
 
         return {
             'percent': passingPercent,
             'passing': passingScore,
-            'max': maxScore,
+            'max': 1,
             'min': 0
         };
     }
@@ -673,31 +331,24 @@ class Gift {
             console.log(msg);
         }
     }
+}
 
-    //TODO: move to ScormUtils
+class GiftPlugin {
+    setDebug(debug) {
+    }
 
-    static trueFalseType = 'true-false';
-    static choiceType = 'choice';
-    //static fillInType = 'fill-in'
-    static matchingType = 'matching';
-    //static performanceType = 'performance';
-    static sequencingType = 'sequencing';
-    //static likertType = 'likert';
-    //static numericType = 'numeric';
+    init() {
+    }
 
-    static correctResult = 'correct';
-    static wrongResult = 'wrong';
-    static neutralResult = 'neutral';
-    static unanticipatedResult = 'unanticipated';
+    getMasteryScore() {
+        throw new Error('Not yet implemented');
+    }
 
-    static passedStatus = 'passed';
-    //static completedStatus = 'completed';
-    static failedStatus = 'failed';
-    //static incompleteStatus = 'incomplete';
-    //static browsedStatus = 'browsed';
-    //static notAttemptedStatus = 'not attempted';
+    run() {
+        throw new Error('Not yet implemented');
+    }
 
-    static normalExit = '';
-    static timeOutExit = 'time-out';
-    static suspendExit = 'suspend';
+    submit(test, exitType) {
+        throw new Error('Not yet implemented');
+    }
 }

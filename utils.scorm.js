@@ -33,7 +33,7 @@ let ScormUtils = {
     },
 
     // Format
-    getCmiTime: function (date= new Date()) {
+    getCmiTime: function (date = new Date()) {
         let hours = date.getHours();
         hours = hours < 10 ? '0' + hours : hours;
         let minutes = date.getMinutes();
@@ -65,5 +65,30 @@ let ScormUtils = {
     },
     formatToCmiIdentifier: function (id) {
         return id.replace(/\W+/, '').substr(0, 255);
-    }
+    },
+
+    trueFalseType: 'true-false',
+    choiceType: 'choice',
+    //fillInType: 'fill-in'
+    matchingType: 'matching',
+    //performanceType: 'performance',
+    sequencingType: 'sequencing',
+    //likertType: 'likert',
+    //numericType: 'numeric',
+
+    correctResult: 'correct',
+    wrongResult: 'wrong',
+    neutralResult: 'neutral',
+    unanticipatedResult: 'unanticipated',
+
+    passedStatus: 'passed',
+    //completedStatus: 'completed',
+    failedStatus: 'failed',
+    //incompleteStatus: 'incomplete',
+    //browsedStatus: 'browsed',
+    //notAttemptedStatus: 'not attempted',
+
+    normalExit: '',
+    timeOutExit: 'time-out',
+    suspendExit: 'suspend',
 };

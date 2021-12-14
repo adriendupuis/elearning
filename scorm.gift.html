@@ -46,7 +46,9 @@
 <script src="./array.shuffle.js"></script>
 <script src="./jqueryui.matching.js"></script>
 <script src="./utils.scorm.js"></script>
-<script src="gift.js"></script>
+<script src="./gift.question.js"></script>
+<script src="./gift.js"></script>
+<script src="./scorm.gift.js"></script>
 
 <script>
     Reveal.initialize({
@@ -64,9 +66,9 @@
     }).then(function() {
         let gift;
         if ('localhost' === document.location.hostname) {
-            gift = new Gift('./gift.txt', {debug: true, testTime: 360});
+            gift = new Gift('./gift.txt', {debug: true, Plugin: new ScormGift(), testTime: 360});
         } else {
-            gift = new Gift('./gift.encoded.txt', {testTime: 120, randomize: true, subset: 5, score: '67%'});
+            gift = new Gift('./gift.encoded.txt', {Plugin: new ScormGift(), testTime: 120, randomize: true, subset: 5, score: '67%'});
         }
 
         Reveal.configure({slideNumber: gift.slideNumber.bind(gift)});
