@@ -41,11 +41,11 @@ What is the good <span title="JavaScript">JS</span> code when working w/ `Array`
   ```js
   let i \= a.indexOf(s);
   ```
-  =This is not the good code:
+  ~This is the bad code:
   ```php
   $i \= array_search($s, $a);
   ```
-  =<q>Don't comment bad code &ndash; rewrite it.</q>\n&mdash; Brian W. Kernighan\n& P. J. Plauger.
+  ~<q>Don't comment bad code &ndash; rewrite it.</q>\n&mdash; Brian W. Kernighan\n& P. J. Plauger.
 }
 
 What is the dictionary wiki? {

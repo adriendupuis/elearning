@@ -7,7 +7,7 @@ POCs and tools about self producing eLearning contents.
 * scorm.sh: Archive (.zip) a set of resources into a SCORM 1.2 package (SCO).
   - scorm.all.sh: Create all DEMO SCOs by just running `./scorm.all.sh;`.
 * scorm.reveal.js: Connect a reveal.js presentation to an LMS through SCORM API.
-* scorm.gift.js: Parse a GIFT file, display its test using reveal.js, submit to LMS using SCORM API.
+* gift.js: Parse a GIFT file, display its test using reveal.js, submit to LMS using SCORM API.
 * utils.scorm.js: Function collection to help with SCORM formats and common tasks.
 * classmarker2gift.php: Convert [ClassMarker](https://www.classmarker.com) [CSV export](https://www.classmarker.com/online-testing/manual/#exportquestions) to GIFT file.
 
@@ -20,7 +20,9 @@ POCs and tools about self producing eLearning contents.
 * Slides: _[reveal.js](https://revealjs.com/)_ [by @hakimel under MIT License](https://github.com/hakimel/reveal.js/blob/master/LICENSE)
 * SCORM:
   - _SCORM API Wrapper_ [by Philip Hutchison under MIT-style License](https://github.com/pipwerks/scorm-api-wrapper)
-  - [Example SCORM courses](https://scorm.com/scorm-explained/technical-scorm/golf-examples/) at [scorm.com](https://scorm.com) by Rustici Software under [Creative Commons Attribution 3.0 License](https://creativecommons.org/licenses/by/3.0/)
+  - [Example SCORM courses](https://scorm.com/scorm-explained/technical-scorm/golf-examples/) at [scorm.com](https://scorm.com) by [Rustici Software](https://rusticisoftware.com) under [Creative Commons Attribution 3.0 License](https://creativecommons.org/licenses/by/3.0/)
+* cmi5:
+  - [xAPI.js - cmi5 Profile Library](https://www.xapijs.dev/) [under MIT License](https://github.com/xapijs/cmi5/blob/master/LICENSE.md)
 * [GIFT format](https://docs.moodle.org/en/GIFT_format) by [Moodle](https://moodle.org/) [under GNU General Public License](https://docs.moodle.org/dev/License)
 
 
