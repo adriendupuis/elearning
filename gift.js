@@ -176,11 +176,18 @@ class Gift {
             $('<section class="' + this.options.questionSlideClass + '">').append(questionContainerElement).insertBefore(submitSlide);
         }
 
-        this.options.Reveal.getPlugin('highlight').init(this.options.Reveal);
-        $('pre code').each(function (index, element) {
-            $(element).text($(element).text().trim());
-            this.options.Reveal.getPlugin('highlight').highlightBlock(element);
+        let hlPlug = this.options.Reveal.getPlugin('highlight');
+        hlPlug.init(this.options.Reveal);
+        $('pre code').each(function(index, element) {
+            $(element).text($(element).text().replace(/<br>/g, "\n").trim());
+            let language = $(element).attr('class') ? $(element).attr('class') : $(element).parent('pre').attr('class');
+            if (language && hlPlug.hljs.getLanguage(language)) {
+                hlPlug.highlightBlock(element, language);
+            } else {
+                hlPlug.highlightBlock(element);
+            }
         }.bind(this));
+
         this.options.Reveal.sync();
         this.options.Reveal.slide(0, 0);
         $(this.options.slideSelector).each(function () {
