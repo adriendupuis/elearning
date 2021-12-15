@@ -33,15 +33,14 @@ let ScormUtils = {
     },
 
     // Format
-    getCmiTime: function () {
-        let now = new Date();
-        let hours = now.getHours();
+    getCmiTime: function (date = new Date()) {
+        let hours = date.getHours();
         hours = hours < 10 ? '0' + hours : hours;
-        let minutes = now.getMinutes();
+        let minutes = date.getMinutes();
         minutes = minutes < 10 ? '0' + minutes : minutes;
-        let seconds = now.getSeconds();
+        let seconds = date.getSeconds();
         seconds = seconds < 10 ? '0' + seconds : seconds;
-        let hundredths = Math.round(now.getMilliseconds() / 100)
+        let hundredths = Math.round(date.getMilliseconds() / 100)
         hundredths = seconds == 0 ? '00' : (hundredths < 10 ? '0' + hundredths : hundredths);
         return hours + ':' + minutes + ':' + seconds + '.' + hundredths;
     },
@@ -59,5 +58,37 @@ let ScormUtils = {
         seconds = Math.round(seconds * 100) / 100;
         seconds = seconds < 10 ? '0' + seconds : seconds;
         return hours + ':' + minutes + ':' + seconds;
-    }
+    },
+    // From SCORM RTE specs: CMIIdentifier is "An alphanumeric group of characters with no white space or unprintable characters in it. Maximum of 255 characters."
+    isCmiIdentifier: function (id) {
+        return /^\w{1,255}$/.test(id);
+    },
+    formatToCmiIdentifier: function (id) {
+        return id.replace(/\W+/, '').substr(0, 255);
+    },
+
+    trueFalseType: 'true-false',
+    choiceType: 'choice',
+    //fillInType: 'fill-in'
+    matchingType: 'matching',
+    //performanceType: 'performance',
+    sequencingType: 'sequencing',
+    //likertType: 'likert',
+    //numericType: 'numeric',
+
+    correctResult: 'correct',
+    wrongResult: 'wrong',
+    neutralResult: 'neutral',
+    unanticipatedResult: 'unanticipated',
+
+    passedStatus: 'passed',
+    //completedStatus: 'completed',
+    failedStatus: 'failed',
+    //incompleteStatus: 'incomplete',
+    //browsedStatus: 'browsed',
+    //notAttemptedStatus: 'not attempted',
+
+    normalExit: '',
+    timeOutExit: 'time-out',
+    suspendExit: 'suspend',
 };

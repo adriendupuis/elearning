@@ -29,5 +29,9 @@ let RevealUtils = {
     },
     hasSeenAllSlides: function() {
         return Reveal.getTotalSlides() === this.seenSlides.length;
+    },
+    getProgress: function() {
+        console.log(Reveal.getProgress(), this.seenSlides.length/Reveal.getTotalSlides());
+        return this.seenSlides.length/Reveal.getTotalSlides();
     }
 };
