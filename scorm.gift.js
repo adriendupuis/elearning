@@ -1,3 +1,6 @@
+// Docs:
+// - SCORM 1.2 Specification available at https://adlnet.gov/projects/scorm/#scorm-12
+
 class ScormGift extends GiftPlugin {
     debug = false;
 
