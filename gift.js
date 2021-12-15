@@ -180,11 +180,9 @@ class Gift {
         hlPlug.init(this.options.Reveal);
         $('pre code').each(function(index, element) {
             $(element).text($(element).text().replace(/<br>/g, "\n").trim());
-            let language = $(element).attr('class') ? $(element).attr('class') : $(element).parent('pre').attr('class');
+            let language = $(element).attr('class');
             if (language && hlPlug.hljs.getLanguage(language)) {
                 hlPlug.highlightBlock(element, language);
-            } else {
-                hlPlug.highlightBlock(element);
             }
         }.bind(this));
 
