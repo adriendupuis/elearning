@@ -4,6 +4,7 @@
 .reveal pre {
     display: inline-block;
     width: auto;
+    vertical-align: baseline;
 }
 .timer {
     position: absolute;
