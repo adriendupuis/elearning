@@ -1,0 +1,17 @@
+.ui-draggable, .ui-sortable-handle, label, button {
+    cursor: pointer;
+}
+.reveal pre {
+    display: inline-block;
+    width: auto;
+}
+.timer {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 32;
+    font: 12px Helvetica, sans-serif;
+    color: #fff;
+    background-color: rgba(0, 0, 0, .4);
+    padding: 5px;
+}
