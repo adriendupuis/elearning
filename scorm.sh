@@ -48,7 +48,7 @@ done;
 # Manifest
 
 ## Structure and XSD
-if useScormDotComPackageTemplate; then
+if $useScormDotComPackageTemplate; then
   curl --output $scormPackageTemplate "https://21w98o3yqgi738kmv7xrf9lj-wpengine.netdna-ssl.com/wp-content/assets/golf_examples/PIFS/ContentPackagingSingleSCO_SCORM12.zip"; # https://scorm.com/scorm-explained/technical-scorm/golf-examples/
 else
   # Warning: No license found so it's "All right reserved" by default.

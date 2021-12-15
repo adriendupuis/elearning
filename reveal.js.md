@@ -45,6 +45,8 @@ Skeleton is provided in [this zip archive: skeleton.zip](download/skeleton.zip)
 
 ## Part 2.2
 
+[_Educational technology_ Wikipedia article](https://en.wikipedia.org/wiki/Educational_technology)
+
 ---
 
 ## Outro
