@@ -17,6 +17,17 @@ Cmi5.prototype.sendStatement = async function (st) {
         }
     }
 };
+Cmi5.prototype.__sendStatements = Cmi5.prototype.sendStatements;
+Cmi5.prototype.sendStatements = async function (sts) {
+    try {
+        await this.__sendStatements(sts);
+    } catch (ex) {
+        // Avoid error on 200 instead of 204 but re-throw other errors.
+        if (ex.message !== 'Failed to send statements: status code 200') {
+            throw ex;
+        }
+    }
+};
 
 CourseCmi5Plugin.prototype.__setActivityState = CourseCmi5Plugin.prototype.setActivityState;
 CourseCmi5Plugin.prototype.setActivityState = async function (stateId, data) {
