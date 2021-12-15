@@ -68,7 +68,7 @@ if (false !== ($fileHandle = fopen($argv[1], 'r'))) {
 }
 
 function formatText($code) {
-    return preg_replace(['/^&nbsp;/', '/&nbsp;$/'], '', str_replace(["\n", '[', ']', "\xc2\xa0"], ['\n', '<', '>', '&nbsp;'], escapeSpecialCharacters(trim($code))));
+    return preg_replace(['/^&nbsp;/', '/&nbsp;$/'], '', str_replace(["\n", '<', '>', '[', ']', "\xc2\xa0"], ['\n', '&lt;', '&gt;', '<', '>', '&nbsp;'], escapeSpecialCharacters(trim($code))));
 }
 
 function escapeSpecialCharacters($code) {
