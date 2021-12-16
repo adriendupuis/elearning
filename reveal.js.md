@@ -3,6 +3,7 @@
 ## Intro
 
 [Part 2.2](#/2/1)
+[Part 2.2](#part_2.2)
 
 ---
 
@@ -46,9 +47,11 @@ Skeleton is provided in [this zip archive: skeleton.zip](download/skeleton.zip)
 --
 
 ## Part 2.2
+<a name="part_2.2"></a>
 
 [_Educational technology_ Wikipedia article](https://en.wikipedia.org/wiki/Educational_technology)
 
 ---
 
 ## Outro
+<a name="part_2.2"></a>

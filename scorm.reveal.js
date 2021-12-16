@@ -17,14 +17,7 @@ if ('undefined' === typeof RevealUtils) {
 }
 
 Reveal.addEventListener('ready', function (event) {
-    // Open external links in new window to not disturb SCORM player
-    let anchors = document.getElementsByTagName('a');
-    let regex = /^(https?:)?\/\//;
-    for (var i = 0; i < anchors.length; i++) {
-        if (regex.test(anchors[i].getAttribute('href'))) {
-            anchors[i].setAttribute('target', '_blank');
-        }
-    }
+    RevealUtils.fixLinks();
 
     if (pipwerks.SCORM.init()) {
         if (1 >= Reveal.getTotalSlides()) {
