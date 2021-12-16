@@ -35,7 +35,7 @@
 
 <script src="./array.shuffle.js"></script>
 <script src="./jqueryui.matching.js"></script>
-<script src="./utils.cmi5.js"></script>
+<script src="cmi5.utils.js"></script>
 <script src="./gift.js"></script>
 <script src="./cmi5.gift.js"></script>
 
@@ -55,7 +55,7 @@
     }).then(function() {
         let gift;
         if ('localhost' === document.location.hostname) {
-            gift = new Gift('./gift.txt', {debug: true, Plugin: new Cmi5Gift(), testTime: 360});
+            gift = new Gift('./gift.dirty.txt', {debug: true, Plugin: new Cmi5Gift(), testTime: 360});
         } else {
             gift = new Gift('./gift.encoded.txt', {Plugin: new Cmi5Gift(), testTime: 120, randomize: true, subset: 5, score: '67%'});
         }

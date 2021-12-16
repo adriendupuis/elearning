@@ -31,7 +31,7 @@
 
 <script src="./array.shuffle.js"></script>
 <script src="./jqueryui.matching.js"></script>
-<script src="./utils.scorm.js"></script>
+<script src="scorm.utils.js"></script>
 <script src="./gift.js"></script>
 <script src="./scorm.gift.js"></script>
 
@@ -51,7 +51,7 @@
     }).then(function() {
         let gift;
         if ('localhost' === document.location.hostname) {
-            gift = new Gift('./gift.txt', {debug: true, Plugin: new ScormGift(), testTime: 360});
+            gift = new Gift('./gift.dirty.txt', {debug: true, Plugin: new ScormGift(), testTime: 360});
         } else {
             gift = new Gift('./gift.encoded.txt', {Plugin: new ScormGift(), testTime: 120, randomize: true, subset: 5, score: '67%'});
         }

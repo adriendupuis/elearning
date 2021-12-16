@@ -3,6 +3,7 @@
 # https://www.ispringsolutions.com/blog/how-to-convert-html-to-scorm#turninghtmltoscormthemanualway
 # https://myelearningworld.com/3-best-ways-to-create-a-scorm-content-package/
 
+
 # Arguments
 
 outputFile=$1;
@@ -22,7 +23,8 @@ releaseDir='./release';
 outputFile="$releaseDir/$outputFile";
 
 
-# Config and arguments checking
+# Checks
+
 if [ -e $packageRoot ]; then
   echo "Error: $packageRoot already exists.";
   exit 1;
@@ -35,6 +37,17 @@ if [ -e $outputFile ]; then
   echo 'Warning: remove previous output file to renew it:';
   rm -v $outputFile;
 fi;
+
+
+# Framework
+
+function sedi() {
+  if [ 'Darwin' == `uname` ]; then
+    sed -i '' "$1" "$2";
+  else
+    sed -i "$1" "$2";
+  fi;
+}
 
 
 # Resources
@@ -65,14 +78,14 @@ for file in $(find $packageRoot/$packageResourcesDir -type f); do
 done
 if $useScormDotComManifestTemplate; then
   curl --output $packageRoot/imsmanifest.xml https://scorm.com/wp-content/assets/SchemaDefinitionFiles/SCORM%201.2%20Schema%20Definition/imsmanifest.xml;
-  sed -i '' "s@<title>Title</title>@<title>$outputTitle</title>@" $packageRoot/imsmanifest.xml;
-  sed -i '' "s@<resource \(.*\) href=\"index.html\">@<resource \1 href=\"$packageResourcesDir/$indexFile\">@" $packageRoot/imsmanifest.xml;
-  sed -i '' "s@<file href=\"index.html\" />@$files@" $packageRoot/imsmanifest.xml;
+  sedi "s@<title>Title</title>@<title>$outputTitle</title>@" $packageRoot/imsmanifest.xml;
+  sedi "s@<resource \(.*\) href=\"index.html\">@<resource \1 href=\"$packageResourcesDir/$indexFile\">@" $packageRoot/imsmanifest.xml;
+  sedi "s@<file href=\"index.html\" />@$files@" $packageRoot/imsmanifest.xml;
 else
-  sed -i '' 's@Course_1_organization@organization@' $packageRoot/imsmanifest.xml;
-  sed -i '' "s@<title>Course_1</title>@<title>$outputTitle</title>@" $packageRoot/imsmanifest.xml;
-  sed -i '' "s@<resource \(.*\) href=\"res/start_1.html\">@<resource \1 href=\"$packageResourcesDir/$indexFile\">@" $packageRoot/imsmanifest.xml;
-  sed -i '' "s@<file href=\"res/start_1.html\"/>@$files@" $packageRoot/imsmanifest.xml;
+  sedi 's@Course_1_organization@organization@' $packageRoot/imsmanifest.xml;
+  sedi "s@<title>Course_1</title>@<title>$outputTitle</title>@" $packageRoot/imsmanifest.xml;
+  sedi "s@<resource \(.*\) href=\"res/start_1.html\">@<resource \1 href=\"$packageResourcesDir/$indexFile\">@" $packageRoot/imsmanifest.xml;
+  sedi "s@<file href=\"res/start_1.html\"/>@$files@" $packageRoot/imsmanifest.xml;
 fi;
 
 
