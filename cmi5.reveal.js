@@ -14,6 +14,8 @@ if ('undefined' === typeof RevealUtils) {
 let cmi5Plugin = new CourseCmi5Plugin();
 
 Reveal.addEventListener('ready', function (event) {
+    RevealUtils.fixLinks();
+
     cmi5Plugin.initialize(function () {
         let seenSlides = cmi5Plugin.getSuspendData().then(function (suspendData) {
             if (suspendData) {
