@@ -35,29 +35,29 @@ let RevealUtils = {
         return this.seenSlides.length / Reveal.getTotalSlides();
     },
     fixLinks: function () {
-        this.fixExternalLinks();
-        this.fixFragmentLinks();
-    },
-    fixExternalLinks: function () {
         let anchors = document.getElementsByTagName('a');
-        let regex = /^(https?:)?\/\//;
         for (var i = 0; i < anchors.length; i++) {
-            if (regex.test(anchors[i].getAttribute('href'))) {
-                anchors[i].setAttribute('target', '_blank');
-            }
+            this.fixExternalLink(anchors[i]);
+            this.fixFragmentLink(anchors[i]);
         }
     },
-    fixFragmentLinks: function () {
-        let anchors = document.getElementsByTagName('a');
-        let regex = /^#/;
-        for (var i = 0; i < anchors.length; i++) {
-            if (regex.test(anchors[i].getAttribute('href'))) {
-                let fragment = anchors[i].getAttribute('href');
-                let slide = this.getElementSlide('a[name="' + fragment.replace('#', '') + '"]');
-                if (slide) {
-                    let indices = Reveal.getIndices(slide);
-                    anchors[i].setAttribute('href', '#' + indices.h + (indices.v ? '/' + indices.v : ''));
-                }
+    fixExternalLink: function (anchor) {
+        if (/^(https?:)?\/\//.test(anchor.getAttribute('href'))) {
+            anchor.setAttribute('target', '_blank');
+        }
+    },
+    fixFragmentLink: function (anchor) {
+        if (/^#/.test(anchor.getAttribute('href'))) {
+            let fragment = anchor.getAttribute('href').replace('#', '');
+            let slide = this.getElementSlide('a[name="' + fragment + '"]');
+            if (!slide) {
+                try {
+                    slide = this.getElementSlide(decodeURI(fragment));
+                } catch (e) {}
+            }
+            if (slide) {
+                let indices = Reveal.getIndices(slide);
+                anchor.setAttribute('href', '#/' + indices.h + (indices.v ? '/' + indices.v : ''));
             }
         }
     },

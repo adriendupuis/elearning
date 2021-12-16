@@ -2,8 +2,9 @@
 
 ## Intro
 
-[Part 2.2](#/2/1)
-[Part 2.2](#part_2.2)
+- [Part 2.2](#/2/1)
+- [Part 2.2](#part_2.2)
+- [Submit](#button[type="submit"])
 
 ---
 
@@ -55,3 +56,4 @@ Skeleton is provided in [this zip archive: skeleton.zip](download/skeleton.zip)
 
 ## Outro
 <a name="part_2.2"></a>
+<button type="submit">Submit</button>
