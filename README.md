@@ -44,4 +44,4 @@ If an ID is duplicated, duplicate will be suffixed with underscores until it bec
 
 The GIFT file can contain code highlights using Markdown-like syntax or using HTML like `<pre><code class="language"></code></html>`.
 
-Comments start with `//`. Contrary to [specification](https://docs.moodle.org/en/GIFT_format#Line_Comments]), comment can end a content line. `//` will be ignored when in `http://` or `https://`. [TODO: Could be simpler to stick to the spec]
+Comments start with `//`. Contrary to [specification](https://docs.moodle.org/en/GIFT_format#Line_Comments), comment can end a content line. `//` will be ignored when in `http://` or `https://`. [TODO: Could be simpler to stick to the spec]

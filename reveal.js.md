@@ -21,6 +21,8 @@ class SomeController {
 }
 ```
 
+(Doc: https://symfony.com/doc/current/controller.html)
+
 --
 
 ## Part 1.2
@@ -30,6 +32,8 @@ some:
     path: /some
     controller: App\Controller\SomeController::someAction
 ```
+
+(Ref: [Symfony: Creating Routes in YAML](https://symfony.com/doc/current/routing.html#creating-routes-in-yaml-xml-or-php-files))
 
 ---
 
