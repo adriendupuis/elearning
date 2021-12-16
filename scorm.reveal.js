@@ -7,13 +7,13 @@ if ('undefined' === typeof pipwerks || 'undefined' === typeof pipwerks.SCORM) {
     console.log('dependency error: pipwerks\' SCORM API Wrapper is missing');
 }
 if ('undefined' === typeof ScormUtils) {
-    console.log('dependency error: utils.scorm.js is missing');
+    console.log('dependency error: scorm.utils.js is missing');
 }
 if ('undefined' === typeof Reveal) {
     console.log('dependency error: reveal.js is missing');
 }
 if ('undefined' === typeof RevealUtils) {
-    console.log('dependency error: utils.reveal.js is missing');
+    console.log('dependency error: reveal.utils.js is missing');
 }
 
 Reveal.addEventListener('ready', function (event) {

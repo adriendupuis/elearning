@@ -8,7 +8,7 @@ if ('undefined' === typeof Reveal) {
     console.log('dependency error: reveal.js is missing');
 }
 if ('undefined' === typeof RevealUtils) {
-    console.log('dependency error: utils.reveal.js is missing');
+    console.log('dependency error: reveal.utils.js is missing');
 }
 
 let cmi5Plugin = new CourseCmi5Plugin();
