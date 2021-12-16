@@ -13,6 +13,7 @@ jobs:
       - uses: actions/checkout@v2
       - run: |
           set -x
+          bash cmi5.all.sh
           bash scorm.all.sh
           assets=()
           for asset in ./release/*.zip; do
