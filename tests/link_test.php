@@ -113,7 +113,7 @@ foreach (array_slice($argv, 1) as $file) {
                     if (!$excluded) {
                         $toBeFixed = true;
                     }
-                    if ($verbose && !$excluded) {
+                    if ($verbose || !$excluded) {
                         echo "$line: $code $url → $location [$text]\n";
                     }
                     break;
