@@ -21,6 +21,8 @@ class SomeController {
 }
 ```
 
+(Doc: https://symfony.com/doc/current/controller.html)
+
 --
 
 ## Part 1.2
@@ -31,6 +33,8 @@ some:
     controller: App\Controller\SomeController::someAction
 ```
 
+(Ref: [Symfony: Creating Routes in YAML](https://symfony.com/doc/current/routing.html#creating-routes-in-yaml-xml-or-php-files))
+
 ---
 
 ## Part 2.1
@@ -40,6 +44,8 @@ Skeleton is provided in [this zip archive: skeleton.zip](download/skeleton.zip)
 --
 
 ## Part 2.2
+
+[_Educational technology_ Wikipedia article](https://en.wikipedia.org/wiki/Educational_technology)
 
 ---
 

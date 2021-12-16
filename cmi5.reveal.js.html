@@ -21,12 +21,15 @@
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/plugin/markdown/markdown.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/plugin/highlight/highlight.js"></script>
 
-<script src="https://cdn.jsdelivr.net/gh/pipwerks/scorm-api-wrapper@master/src/JavaScript/SCORM_API_wrapper.js"></script>
-<script>pipwerks.debug.isActive = 'localhost' === document.location.hostname;</script>
+<!-- https://github.com/adlnet/CATAPULT/blob/main/course_examples/single_au_basic_framed/ -->
+<!-- <script src="https://unpkg.com/@xapi/cmi5"><script> -->
+<script src="https://cdn.jsdelivr.net/gh/adlnet/CATAPULT@main/course_examples/single_au_basic_framed/js/cmi5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/adlnet/CATAPULT@main/course_examples/single_au_basic_framed/js/course_cmi5.js"></script>
+<script>Cmi5.enableDebug();</script>
 
-<script src="scorm.utils.js"></script>
+<script src="cmi5.utils.js"></script>
 <script src="reveal.utils.js"></script>
-<script src="./scorm.reveal.js"></script>
+<script src="./cmi5.reveal.js"></script>
 
 <script>
     Reveal.initialize({
