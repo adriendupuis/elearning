@@ -743,10 +743,10 @@ class MatchingQuestion extends Question {
             this.setElement(questionContainerElement);
         }
         $.each(this.responses.shuffle(), function (index, response) {
-            questionContainerElement.append($('<div class="source">' + response[0] + ' <span class="handle"></span></div>'));
+            questionContainerElement.append($('<div class="matching-source">' + response[0] + ' <span class="handle"></span></div>'));
         });
         $.each(this.responses.shuffle().shuffle(), function (index, response) {
-            questionContainerElement.append($('<div class="target"><span class="handle"></span> ' + response[1] + '</div>'));
+            questionContainerElement.append($('<div class="matching-target"><span class="handle"></span> ' + response[1] + '</div>'));
         });
         questionContainerElement.matching().disableSelection();
     }

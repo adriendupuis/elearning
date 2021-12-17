@@ -1,9 +1,9 @@
 $.widget('custom.matching', {
     options: {
-        source: '.source',
-        target: '.target',
-        draggable: '.target',
-        droppable: '.source'
+        source: '.matching-source',
+        target: '.matching-target',
+        draggable: '.matching-target',
+        droppable: '.matching-source'
     },
     _create: function () {
         let draggableSelector = this.options.draggable;
