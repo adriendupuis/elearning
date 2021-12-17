@@ -742,73 +742,49 @@ class MatchingQuestion extends Question {
         if (questionContainerElement) {
             this.setElement(questionContainerElement);
         }
-        let sourceStack = $('<ul class="matching-source-stack">');
         $.each(this.responses.shuffle(), function (index, response) {
-            sourceStack.append($('<li class="matching-source-item matching-source-text">' + response[0] + '</li>'));
+            questionContainerElement.append($('<div class="source">' + response[0] + ' <span class="handle"></span></div>'));
         });
-        sourceStack.appendTo(this.getElement());
-        let targetStack = $('<ul class="matching-target-stack">');
         $.each(this.responses.shuffle().shuffle(), function (index, response) {
-            targetStack.append($('<li class="matching-target-item"><span class="matching-target-text">' + response[1] + '</span><ul class="matching-target-storage"></ul></li>'));
+            questionContainerElement.append($('<div class="target"><span class="handle"></span> ' + response[1] + '</div>'));
         });
-        targetStack.appendTo(this.getElement());
-        this.getElement().matching({
-            drop: function (event, ui) {
-                let sourceStack = this.getElement().find('.matching-source-stack');
-                let targetStack = this.getElement().find('.matching-target-stack');
-                let sourceStackHeight = sourceStack.height();
-                let targetStackHeight = targetStack.height();
-                if (sourceStackHeight < targetStackHeight) {
-                    sourceStack.height(targetStackHeight);
-                } else if (sourceStackHeight > targetStackHeight) {
-                    targetStack.height(sourceStackHeight);
-                }
-            }.bind(this)
-        });
+        questionContainerElement.matching({
+            invert: true
+        }).disableSelection();
     }
 
     setCorrection(cached) {
         if (null === this.studentCorrectResponseCount || false === cached) {
             let studentCorrectResponseCount = 0;
             let studentWrongResponseCount = 0;
-            let studentUnansweredCount = 0;
             let studentResponse = [];
-
-            this.getElement().find('.matching-target-item').each(function (index, element) {
-                let source = $(element).find('.matching-target-storage .matching-source-text').text();
-                let target = $(element).find('.matching-target-text').text();
-                if (!source.length) {
-                    studentUnansweredCount++;
-                } else {
-                    let correct = false;
-                    let sourceIndex = null, targetIndex = null;
-                    $.each(this.responses, function (index, response) {
-                        if (source === response[0]) {
-                            sourceIndex = index;
-                        }
-                        if (target === response[1]) {
-                            targetIndex = index;
-                        }
-                        if (null !== sourceIndex && null !== targetIndex) {
-                            return false;
-                        }
-                    });
-                    if (null === sourceIndex) { // Shouldn't occur
-                        studentUnansweredCount++;
-                    } else {
-                        studentResponse.push(sourceIndex.toString() + '.' + targetIndex.toString())
-                        if (sourceIndex === targetIndex) {
-                            studentCorrectResponseCount++;
-                        } else {
-                            studentWrongResponseCount++;
-                        }
-                    }
-                }
-            }.bind(this));
             let correctResponse = [];
-            $.each(this.responses, function (index, response) {
+
+            $.each(this.getResponses(), function (index) {
                 correctResponse.push(index.toString() + '.' + index.toString());
             });
+
+            $.each(this.getElement().matching('getMatches'), function (index, match) {
+                let correct = false;
+                let sourceIndex = null, targetIndex = null;
+                $.each(this.getResponses(), function (index, response) {
+                    if ($(match[0]).text().trim() == response[0]) {
+                        sourceIndex = index;
+                    }
+                    if ($(match[1]).text().trim() == response[1]) {
+                        targetIndex = index;
+                    }
+                    if (null !== sourceIndex && null !== targetIndex) {
+                        return false;
+                    }
+                });
+                studentResponse.push(sourceIndex.toString() + '.' + targetIndex.toString())
+                if (sourceIndex === targetIndex) {
+                    studentCorrectResponseCount++;
+                } else {
+                    studentWrongResponseCount++;
+                }
+            }.bind(this));
 
             this.studentCorrectResponseCount = studentCorrectResponseCount;
             this.studentWrongResponseCount = studentWrongResponseCount;
