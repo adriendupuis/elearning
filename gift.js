@@ -748,9 +748,7 @@ class MatchingQuestion extends Question {
         $.each(this.responses.shuffle().shuffle(), function (index, response) {
             questionContainerElement.append($('<div class="target"><span class="handle"></span> ' + response[1] + '</div>'));
         });
-        questionContainerElement.matching({
-            invert: true
-        }).disableSelection();
+        questionContainerElement.matching().disableSelection();
     }
 
     setCorrection(cached) {

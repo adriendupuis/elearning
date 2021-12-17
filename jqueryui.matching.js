@@ -1,12 +1,13 @@
 $.widget('custom.matching', {
     options: {
-        draggable: '.source',
-        droppable: '.target',
-        invert: false
+        source: '.source',
+        target: '.target',
+        draggable: '.target',
+        droppable: '.source'
     },
     _create: function () {
-        let draggableSelector = this.options.invert ? this.options.droppable : this.options.draggable;
-        let droppableSelector = this.options.invert ? this.options.draggable : this.options.droppable ;
+        let draggableSelector = this.options.draggable;
+        let droppableSelector = this.options.droppable;
 
         let wrapper = this.element.closest('[id]');
         this.element.find(draggableSelector).draggable({
@@ -72,17 +73,20 @@ $.widget('custom.matching', {
     },
     getMatches: function() {
         let matches = [];
-        this.element.find(this.options.invert ? this.options.draggable : this.options.droppable).each(function(index, droppable) {
+        this.element.find(this.options.droppable).each(function(index, droppable) {
             let draggable = $(droppable).data('draggable');
             if (draggable) {
-                let match = [
-                    $(droppable).data('draggable'),
-                    $(droppable)
-                ];
-                if (this.options.invert) {
-                    match.reverse()
+                if ($(droppable).is(this.options.source)) {
+                    matches.push([
+                        $(droppable),
+                        draggable
+                    ]);
+                } else {
+                    matches.push([
+                        draggable,
+                        $(droppable)
+                    ]);
                 }
-                matches.push(match);
             }
         }.bind(this));
 
