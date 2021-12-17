@@ -26,11 +26,8 @@ $.widget('custom.matching', {
                 let currentDraggable = $(ui.draggable);
 
                 let previousDraggable = currentDroppable.data('draggable');
+                let previousDroppable = currentDraggable.data('droppable');
                 if (previousDraggable) {
-                    if (currentDraggable.is(previousDraggable)) {
-                        return;
-                    }
-                    let previousDroppable = currentDraggable.data('droppable');
                     if (previousDroppable) {
                         let currentDroppablePosition = currentDroppable.position();
                         let previousDroppablePosition = previousDroppable.position();
@@ -44,9 +41,15 @@ $.widget('custom.matching', {
                         previousDraggable.addClass('matched');
                     } else {
                         previousDraggable.css({top: 0, left: 0});
-                        previousDraggable.data('droppable', previousDroppable);
+                        previousDraggable.data('droppable', null);
                         previousDraggable.removeClass('matched');
                     }
+                } else if (previousDroppable) {
+                    if (currentDroppable.is(previousDroppable)) {
+                        return;
+                    }
+                    previousDroppable.data('draggable', null);
+                    previousDroppable.removeClass('matched');
                 }
 
                 currentDroppable.data('draggable', currentDraggable);
@@ -60,9 +63,10 @@ $.widget('custom.matching', {
             drop: function (event, ui) {
                 let previousDroppable = $(ui.draggable).data('droppable');
                 if (previousDroppable) {
-                    previousDroppable.data('draggable', null).removeClass('matched');;
-                    $(ui.draggable).data('droppable', null).removeClass('matched');;
+                    previousDroppable.data('draggable', null).removeClass('matched');
+                    $(ui.draggable).data('droppable', null);
                 }
+                $(ui.draggable).removeClass('matched');
             }
         })
     },
