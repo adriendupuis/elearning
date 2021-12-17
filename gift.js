@@ -177,7 +177,7 @@ class Gift {
 
         let hlPlug = this.options.Reveal.getPlugin('highlight');
         hlPlug.init(this.options.Reveal);
-        $('pre code').each(function(index, element) {
+        $('pre code').each(function (index, element) {
             $(element).text($(element).text().replace(/<br>/g, "\n").trim());
             let language = $(element).attr('class');
             if (language && hlPlug.hljs.getLanguage(language)) {
@@ -426,16 +426,22 @@ class Question {
         return this.weight;
     }
 
-    render(questionContainerElement) {
+    render(questionContainerElement = null) {
+        if (questionContainerElement) {
+            this.setElement(questionContainerElement);
+        }
         throw new Error('Not yet implemented at typed question level');
-        return '';
     }
 
     getElement() {
         if (null === this.element) {
-            this.element = $('#' + this.getId());
+            this.setElement('#' + this.getId());
         }
         return this.element;
+    }
+
+    setElement(element) {
+        this.element = $(element);
     }
 
 
@@ -465,7 +471,6 @@ class Question {
 
     setCorrection(cached = true) {
         throw new Error('Not yet implemented at typed question level');
-        return this;
     }
 
     getCorrectResponse(cached = true) {
@@ -610,9 +615,12 @@ class GiftQuestion {
 class TrueFalseQuestion extends Question {
     type = 'true-false';
 
-    render(questionContainerElement) {
-        questionContainerElement.append($('<label><input type="radio" name="' + this.getId() + '" value="true"> True</label>'));
-        questionContainerElement.append($('<label><input type="radio" name="' + this.getId() + '" value="false"> False</label>'));
+    render(questionContainerElement = null) {
+        if (questionContainerElement) {
+            this.setElement(questionContainerElement);
+        }
+        this.getElement().append($('<label><input type="radio" name="' + this.getId() + '" value="true"> True</label>'));
+        this.getElement().append($('<label><input type="radio" name="' + this.getId() + '" value="false"> False</label>'));
     }
 
     setCorrection(cached) {
@@ -635,12 +643,15 @@ class TrueFalseQuestion extends Question {
 class ChoiceQuestion extends Question {
     type = 'choice';
 
-    render(questionContainerElement) {
+    render(questionContainerElement = null) {
+        if (questionContainerElement) {
+            this.setElement(questionContainerElement);
+        }
         let list = $('<ul>');
         $.each(this.getResponses().shuffle(), function (index, response) {
             list.append($('<li><label><input type="checkbox" name="' + this.getId() + '" value="' + response.hash + '"> ' + response.text + '</label></li>'));
         }.bind(this));
-        list.appendTo(questionContainerElement);
+        list.appendTo(this.getElement());
     }
 
     setCorrection(cached) {
@@ -677,12 +688,15 @@ class ChoiceQuestion extends Question {
 class SequencingQuestion extends Question {
     type = 'sequencing';
 
-    render(questionContainerElement) {
+    render(questionContainerElement = null) {
+        if (questionContainerElement) {
+            this.setElement(questionContainerElement);
+        }
         let list = $('<ul>');
         $.each(this.responses.shuffle(), function (index, response) {
             list.append($('<li>' + response[0] + '</li>'));
         });
-        list.appendTo(questionContainerElement).sortable();
+        list.appendTo(this.getElement()).sortable();
     }
 
     setCorrection(cached) {
@@ -724,21 +738,24 @@ class SequencingQuestion extends Question {
 class MatchingQuestion extends Question {
     type = 'matching';
 
-    render(questionContainerElement) {
+    render(questionContainerElement = null) {
+        if (questionContainerElement) {
+            this.setElement(questionContainerElement);
+        }
         let sourceStack = $('<ul class="matching-source-stack">');
         $.each(this.responses.shuffle(), function (index, response) {
             sourceStack.append($('<li class="matching-source-item matching-source-text">' + response[0] + '</li>'));
         });
-        sourceStack.appendTo(questionContainerElement);
+        sourceStack.appendTo(this.getElement());
         let targetStack = $('<ul class="matching-target-stack">');
         $.each(this.responses.shuffle().shuffle(), function (index, response) {
             targetStack.append($('<li class="matching-target-item"><span class="matching-target-text">' + response[1] + '</span><ul class="matching-target-storage"></ul></li>'));
         });
-        targetStack.appendTo(questionContainerElement);
-        questionContainerElement.matching({
+        targetStack.appendTo(this.getElement());
+        this.getElement().matching({
             drop: function (event, ui) {
-                let sourceStack = questionContainerElement.find('.matching-source-stack');
-                let targetStack = questionContainerElement.find('.matching-target-stack');
+                let sourceStack = this.getElement().find('.matching-source-stack');
+                let targetStack = this.getElement().find('.matching-target-stack');
                 let sourceStackHeight = sourceStack.height();
                 let targetStackHeight = targetStack.height();
                 if (sourceStackHeight < targetStackHeight) {
@@ -746,7 +763,7 @@ class MatchingQuestion extends Question {
                 } else if (sourceStackHeight > targetStackHeight) {
                     targetStack.height(sourceStackHeight);
                 }
-            }
+            }.bind(this)
         });
     }
 
