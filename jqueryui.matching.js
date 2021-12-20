@@ -67,7 +67,7 @@ $.widget('custom.matching', {
                     previousDroppable.data('draggable', null).removeClass('matched');
                     $(ui.draggable).data('droppable', null);
                 }
-                $(ui.draggable).removeClass('matched');
+                $(ui.draggable).removeClass('matched').css({top: 0, left: 0});
             }
         })
     },
