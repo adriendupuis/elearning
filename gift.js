@@ -374,6 +374,7 @@ class Question {
     weight = 1;
     startTime = null;
     lastTime = null;
+    stopTime = null;
     latency = 0;
     studentCorrectResponseCount = null;
     studentWrongResponseCount = null;
@@ -455,13 +456,18 @@ class Question {
     }
 
     stop() {
-        this.latency = new Date().getTime() - this.lastTime.getTime();
+        this.stopTime = new Date();
+        this.latency = this.stopTime.getTime() - this.lastTime.getTime();
         this.lastTime = null;
         return this;
     }
 
     getStartTime() {
         return this.startTime;
+    }
+
+    getStopTime() {
+        return this.stopTime;
     }
 
     getLatency() {

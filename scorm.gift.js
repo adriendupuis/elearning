@@ -72,8 +72,8 @@ class ScormGift extends GiftPlugin {
                 student_response: question.getStudentResponse().join(','),
                 result: question.getResult()
             };
-            if (question.getStartTime()) {
-                questionData.time = question.getStartTime();
+            if (question.getStopTime()) {
+                questionData.time = question.getStopTime();
             }
             if ('2004' === pipwerks.SCORM.version) {
                 questionData.description = question.getText();// SCORM 2004 2nd Edition
