@@ -444,7 +444,6 @@ class Question {
         this.element = $(element);
     }
 
-
     start() {
         if (null === this.startTime) {
             this.startTime = new Date();
