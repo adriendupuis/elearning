@@ -15,4 +15,4 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Links test
-        run: php tests/link_test.php *.md
+        run: php tests/external_external_links.php *.md
