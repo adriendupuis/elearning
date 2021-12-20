@@ -18,7 +18,7 @@ POCs and tools about self producing eLearning contents through standards.
 * *.utils.js: Function collections to help with common tasks per subject.
 * classmarker2gift.php: Convert [ClassMarker](https://www.classmarker.com) [CSV export](https://www.classmarker.com/online-testing/manual/#exportquestions) to GIFT file.
 * tests/: Quality test scripts.
-  - tests/external_links.php: test external links 
+  - tests/external_links.php: test external hyperlinks
 
 ## Utils
 
