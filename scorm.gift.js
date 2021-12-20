@@ -66,13 +66,15 @@ class ScormGift extends GiftPlugin {
             let questionData = {
                 id: question.getId(),
                 type: question.getType(),
-                time: ScormUtils.getCmiTime(question.getStartTime()),
                 latency: ScormUtils.getCmiTimespan(question.getLatency()),
                 weighting: question.getWeight(),
                 'correct_responses.0.pattern': question.getCorrectResponse().join(','),
                 student_response: question.getStudentResponse().join(','),
                 result: question.getResult()
             };
+            if (question.getStartTime()) {
+                questionData.time = question.getStartTime();
+            }
             if ('2004' === pipwerks.SCORM.version) {
                 questionData.description = question.getText();// SCORM 2004 2nd Edition
             }
