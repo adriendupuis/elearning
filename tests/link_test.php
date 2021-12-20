@@ -1,6 +1,6 @@
 <?php
 
-$markdownPattern = '\[[^\[]*\]\([^ )]*\)';
+$markdownPattern = '\[[^\[]*\]\(https?://[^ )]*\)';
 $nakedUrlPattern = 'https?://[^ ]*[^ "<)*,.]';
 $verbose = in_array('-v', $argv);
 if ($verbose) {
