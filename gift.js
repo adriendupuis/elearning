@@ -16,6 +16,7 @@ class Gift {
             testSubmitButton: 'section button',
             testTime: null,
             timerContainer: '.timer',
+            timerWarningRatio: 1 / 6,
             passingScore: '100%',
             parseOnlyStandardComment: false
         }, options);
@@ -252,7 +253,10 @@ class Gift {
 
         // Handle timeout
         if (0 >= timeLeft) {
+            $(this.options.timerContainer).hide();
             this.submit(this.options.Plugin.constructor.timeOutExit);
+        } else if (timeLeft / this.options.testTime < this.options.timerWarningRatio) {
+            $(this.options.timerContainer).addClass('warning');
         }
     }
 
@@ -266,6 +270,10 @@ class Gift {
 
     submit(exit = this.options.Plugin.constructor.normalExit) {
         $(this.options.testSubmitButton).hide();
+        if (exit !== this.options.Plugin.constructor.normalExit) {
+            let indices = this.options.Reveal.getIndices(this.getSubmitSlide()[0]);
+            this.options.Reveal.slide(indices.h, indices.v);
+        }
         clearInterval(this.testTimerId);
         if (this.submitted) {
             this.log('runtime error: submitted more than once');
@@ -289,10 +297,25 @@ class Gift {
             passed: passed
         }, exit);
 
+        let feedback = '';
         let scorePercent = Math.max(0, Math.min(Math.round(100 * score), 100));
-        let feedback = scorePercent + '% ' + (passed ? '≥' : '<') + ' ' + configScores.percent;
-        $('<div class="feedback ' + (passed ? 'passed' : 'failed') + '">').text(feedback).insertAfter(this.options.testSubmitButton);
-        $(this.options.testSubmitButton).remove();
+        if (exit === this.options.Plugin.constructor.timeOutExit) {
+            let minutes = Math.floor(this.options.testTime / 60),
+                seconds = this.options.testTime - 60 * minutes,
+                minutesStr = minutes ? minutes + '&nbsp;minute' + (1 < minutes ? 's' : '') : '',
+                secondsStr = seconds ? seconds + '&nbsp;second' + (1 < seconds ? 's' : '') : '',
+                timeStr = minutesStr;
+            if (minutesStr && secondsStr) {
+                timeStr += ' ' + secondsStr;
+            } else if (secondsStr) {
+                timeStr = secondsStr;
+            }
+            feedback = 'Time Out<br>' + timeStr + ' allotted time has elapsed';
+            $('<div class="feedback timeout">').html(feedback).insertAfter(this.options.testSubmitButton);
+        }
+        feedback = scorePercent + '% ' + (passed ? '≥' : '<') + ' ' + configScores.percent + '<br>' + (passed ? 'Passed' : 'Failed');
+        $('<div class="feedback ' + (passed ? 'passed' : 'failed') + '">').html(feedback).insertAfter(this.options.testSubmitButton);
+        //$(this.options.testSubmitButton).remove();
 
         return this;
     }

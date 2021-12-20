@@ -51,7 +51,7 @@
     }).then(function() {
         let gift;
         if ('localhost' === document.location.hostname) {
-            gift = new Gift('./gift.dirty.txt', {debug: true, Plugin: new ScormGift(), testTime: 360});
+            gift = new Gift('./gift.dirty.txt', {debug: true, Plugin: new ScormGift(), testTime: 360, timerWarningRatio: 1 / 2});
         } else {
             gift = new Gift('./gift.encoded.txt', {Plugin: new ScormGift(), testTime: 120, randomize: true, subset: 5, score: '67%'});
         }
