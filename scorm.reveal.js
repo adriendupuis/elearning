@@ -18,6 +18,7 @@ if ('undefined' === typeof RevealUtils) {
 
 Reveal.addEventListener('ready', function (event) {
     RevealUtils.fixLinks();
+    wrapImg();
 
     if (pipwerks.SCORM.init()) {
         if (1 >= Reveal.getTotalSlides()) {

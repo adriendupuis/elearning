@@ -15,6 +15,7 @@ let cmi5Plugin = new CourseCmi5Plugin();
 
 Reveal.addEventListener('ready', function (event) {
     RevealUtils.fixLinks();
+    wrapImg();
 
     cmi5Plugin.initialize(function () {
         let seenSlides = cmi5Plugin.getSuspendData().then(function (suspendData) {
