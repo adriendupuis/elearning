@@ -1,6 +1,7 @@
 <?php
 
 $markdownPattern = '\[[^\[]*\]\(https?://[^ )]*\)';
+$htmlPattern = '<a[^>]* href="[^"]*"[^>]*>[^<]*';
 $nakedUrlPattern = 'https?://[^ "<>]*[^ "<>)*,.]';
 $verbose = in_array('-v', $argv);
 if ($verbose) {
@@ -24,10 +25,25 @@ $excludedRedirections = [
     },
 ];
 
+function output($line, $code, $url, $location = null, $text = null, $notice = null)
+{
+    echo "$line: $code $url";
+    if ($location) {
+        echo " → $location";
+    }
+    if ($text) {
+        echo " [$text]";
+    }
+    if ($notice) {
+        echo ": $notice";
+    }
+    echo PHP_EOL;
+}
+
 $toBeFixed = false;
 foreach (array_slice($argv, 1) as $file) {
     echo "\n$file\n";
-    $grep = trim(shell_exec("grep -onE '$markdownPattern|$nakedUrlPattern' $file"));
+    $grep = trim(shell_exec("grep -onE '$markdownPattern|$htmlPattern|$nakedUrlPattern' $file"));
     if (empty($grep)) {
         continue;
     }
@@ -36,8 +52,7 @@ foreach (array_slice($argv, 1) as $file) {
     for ($index = 0; $index < count($grep); ++$index) {
         $link = $grep[$index];
         $matches = [];
-        $isMarkdown = preg_match('/(?P<line>[0-9]+)?:?\[(?P<text>.*)]\((?P<url>.*)\)/', $link, $matches);
-        if ($isMarkdown) {
+        if (preg_match('/(?P<line>[0-9]+)?:?\[(?P<text>.*)]\((?P<url>.*)\)/', $link, $matches) || preg_match('/(?P<line>[0-9]+)?:?<a[^>]* href="(?P<url>[^"]+)"[^>]*>(?P<text>[^<]*)/', $link, $matches)) {
             $url = $matches['url'];
             $text = $matches['text'];
         } else {
@@ -66,17 +81,17 @@ foreach (array_slice($argv, 1) as $file) {
                         if (false === strpos($contents, "\"$fragment\"")) {
                             $toBeFixed = true;
                             $fragmentFound = false;
-                            echo "$line: $code $url [$text]: anchor \"$fragment\" not found.\n";
+                            output($line, $code, $url, null, $text, "anchor \"$fragment\" not found.");
                         }
                     }
                     if ($verbose && $fragmentFound) {
-                        echo "$line: $code $url [$text]\n";
+                        output($line, $code, $url, null, $text);
                     }
 
                     break;
                 case 404:
                     $toBeFixed = true;
-                    echo "$line: $code $url [$text]\n";
+                    output($line, $code, $url, null, $text);
                     break;
                 case 301:
                 case 302:
@@ -114,7 +129,7 @@ foreach (array_slice($argv, 1) as $file) {
                         $toBeFixed = true;
                     }
                     if ($verbose || !$excluded) {
-                        echo "$line: $code $url → $location [$text]\n";
+                        output($line, $code, $url, $location, $text);
                     }
                     break;
             }
