@@ -22,12 +22,15 @@ $excludedUrls = [
     function ($url) {
         return preg_match('@{{ asset\(.*\) }}@', $url);
     },
+    function ($url) {
+        return false !== strpos($url, '//upload.wikimedia.org/');
+    },
 ];
 
 $toBeFixed = false;
+$grepPatterns = implode('|', $patterns);
 foreach (array_slice($argv, 1) as $file) {
     echo "\n$file\n";
-    $grepPatterns = implode('|', $patterns);
     $grep = trim(shell_exec("grep -onE '$grepPatterns' $file"));
     if (empty($grep)) {
         continue;
@@ -75,7 +78,9 @@ foreach (array_slice($argv, 1) as $file) {
                     break;
                 case 301:
                 case 302:
+                case 403;
                 case 404:
+                default:
                     $toBeFixed = true;
                     echo "$line: $code $url\n";
             }

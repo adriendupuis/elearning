@@ -112,10 +112,6 @@ foreach (array_slice($argv, 1) as $file) {
                     }
 
                     break;
-                case 404:
-                    $toBeFixed = true;
-                    output($line, $code, $url, null, $text);
-                    break;
                 case 301:
                 case 302:
                     $location = '(unknown)';
@@ -155,6 +151,12 @@ foreach (array_slice($argv, 1) as $file) {
                     if ($verbose || !$excluded) {
                         output($line, $code, $url, $location, $text, $excluded ? 'acceptable redirect' : null);
                     }
+                    break;
+                case 403:
+                case 404:
+                default:
+                    $toBeFixed = true;
+                    output($line, $code, $url, null, $text);
                     break;
             }
         } else if ($verbose) {
