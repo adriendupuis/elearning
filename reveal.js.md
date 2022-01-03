@@ -43,7 +43,7 @@ some:
 
 ## Part 2.1
 
-Skeleton is provided in [this zip archive: skeleton.zip](download/skeleton.zip)
+Skeleton is provided in [this zip archive: skeleton.zip](./download/skeleton.zip)
 
 --
 

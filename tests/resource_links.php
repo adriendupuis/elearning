@@ -8,6 +8,7 @@ foreach ([
          ] as $tag => $attribute) {
     $patterns[] = "<$tag [^>]*$attribute=\"([^\"]+)\"";
 }
+$patterns[] = '\[[^]]+\]\((\.\/[^)]+)\)';
 $defaultScheme = 'https';
 $verbose = in_array('-v', $argv);
 if ($verbose) {
