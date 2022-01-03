@@ -1,6 +1,8 @@
 <?php
 
 $usageFilePatterns = ['*.md', '*.html', '*.css'];
+$excludedResourcePaths = ['README.md'];
+$excludedUsagePaths = [];
 $verbose = in_array('-v', $argv);
 if ($verbose) {
     array_splice($argv, array_search('-v', $argv), 1);
@@ -12,16 +14,19 @@ $resourceFiles = [];
 foreach ($usageFilePatterns as $pattern) {
     $usageFiles = array_merge($usageFiles, array_map(function ($path) {
         return preg_replace('@^./@', '', $path);
-    }, explode(PHP_EOL, trim(shell_exec("find . -type f -name '$pattern' -a -not -name README.md;")))));
+    }, explode(PHP_EOL, trim(shell_exec("find . -type f -name '$pattern';")))));
 }
 
+$findOptions = empty($excludedResourcePaths) ? '' : ' ' . implode(' -a ', array_map(function ($path) {
+        return "-not -wholename $path";
+    }, $excludedResourcePaths));
 foreach (array_slice($argv, 1) as $path) {
     $path = preg_replace('@^./@', '', rtrim($path, '/'));
-    if (empty($path) || 'README.md' === $path) {
+    if (empty($path) || in_array($path, $excludedResourcePaths)) {
         continue;
     }
     if (is_dir($path)) {
-        $resourceFiles = array_merge($resourceFiles, explode(PHP_EOL, trim(shell_exec("find $path -type f -not -name README.md;"))));
+        $resourceFiles = array_merge($resourceFiles, explode(PHP_EOL, trim(shell_exec("find $path -type f{$findOptions};"))));
     } elseif (file_exists($path)) {
         $resourceFiles[] = $path;
     } else {
