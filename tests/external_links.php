@@ -32,6 +32,9 @@ $excludedRedirections = [
     },
 ];
 
+$excludedFragments = [
+];
+
 function output($line, $code, $url, $location = null, $text = null, $notice = null)
 {
     $code = str_pad($code, 3, 0, STR_PAD_LEFT);
@@ -74,7 +77,7 @@ foreach (array_slice($argv, 1) as $file) {
         foreach ($excludedUrls as $excludedUrl) {
             if ($excludedUrl($url)) {
                 if ($verbose) {
-                    output($line, 0, $url, null, $text, 'skipped, not tested');
+                    output($line, 0, $url, null, $text, 'URL skipped, not tested');
                 }
                 continue 2;
             }
@@ -86,17 +89,26 @@ foreach (array_slice($argv, 1) as $file) {
             switch ($code) {
                 case 200:
                     $fragmentFound = true;
+                    $excluded = false;
                     if (false !== strpos($url, '#')) {
-                        $contents = file_get_contents($url);
                         $fragment = parse_url($url, PHP_URL_FRAGMENT);
-                        if (false === strpos($contents, "\"$fragment\"")) {
-                            $toBeFixed = true;
-                            $fragmentFound = false;
-                            output($line, $code, $url, null, $text, "anchor \"$fragment\" not found.");
+                        foreach ($excludedFragments as $excludedFragment) {
+                            if ($excludedFragment($url)) {
+                                $excluded = true;
+                                break;
+                            }
+                        }
+                        if (!$excluded) {
+                            $contents = file_get_contents($url);
+                            if (false === strpos($contents, "\"$fragment\"")) {
+                                $toBeFixed = true;
+                                $fragmentFound = false;
+                                output($line, $code, $url, null, $text, "anchor \"$fragment\" not found.");
+                            }
                         }
                     }
                     if ($verbose && $fragmentFound) {
-                        output($line, $code, $url, null, $text);
+                        output($line, $code, $url, null, $text, $excluded ? "anchor \"$fragment\" not tested" : null);
                     }
 
                     break;
@@ -134,6 +146,7 @@ foreach (array_slice($argv, 1) as $file) {
                     foreach ($excludedRedirections as $excludedRedirection) {
                         if ($excludedRedirection($url, $fullLocation)) {
                             $excluded = true;
+                            break;
                         }
                     }
                     if (!$excluded) {
