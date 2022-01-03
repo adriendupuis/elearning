@@ -18,4 +18,4 @@ jobs:
         run: php tests/external_links.php *.md
 
       - name: Internal & External Resources test
-        run: php tests/resource_links.php *.md
+        run: php tests/resource_links.php *.md *.html
