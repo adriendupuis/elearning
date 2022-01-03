@@ -1,8 +1,9 @@
 <?php
 
-$markdownPattern = '\[[^\[]*\]\(https?://[^ )]*\)';
+$markdownPattern = '\[[^\[]*\]\((https?:)?//[^ )]*\)';
 $htmlPattern = '<a[^>]* href="[^"]*"[^>]*>[^<]*';
-$nakedUrlPattern = 'https?://[^ "<>]*[^ "<>)*,.]';
+$nakedUrlPattern = '(https?:)?//[^ "<>]*[^ "<>)*,.]';
+$defaultScheme = 'https';
 $verbose = in_array('-v', $argv);
 if ($verbose) {
     array_splice($argv, array_search('-v', $argv), 1);
@@ -17,6 +18,12 @@ $excludedUrls = [
 
 // The redirection itself is not reported as a problem. The redirection target will still be tested.
 $excludedRedirections = [
+    //function ($url, $location) {
+    //    return $location === "$url/";
+    //},
+    //function ($url, $location) {
+    //    return $location === str_replace('http://', 'https://', $url);
+    //},
     function ($url, $location) {
         return $location === str_replace('moodle.org/en/', 'moodle.org/311/en/', $url);
     },
@@ -27,6 +34,7 @@ $excludedRedirections = [
 
 function output($line, $code, $url, $location = null, $text = null, $notice = null)
 {
+    $code = str_pad($code, 3, 0, STR_PAD_LEFT);
     echo "$line: $code $url";
     if ($location) {
         echo " → $location";
@@ -65,10 +73,13 @@ foreach (array_slice($argv, 1) as $file) {
         }
         foreach ($excludedUrls as $excludedUrl) {
             if ($excludedUrl($url)) {
+                if ($verbose) {
+                    output($line, 0, $url, null, $text, 'skipped, not tested');
+                }
                 continue 2;
             }
         }
-        $headers = @get_headers($url);
+        $headers = @get_headers('//' === substr($url, 0, 2) ? "$defaultScheme:$url" : $url);
         if ($headers && count($headers)) {
             $firstLinePart = explode(' ', $headers[0]);
             $code = (int)$firstLinePart[1];
@@ -129,10 +140,12 @@ foreach (array_slice($argv, 1) as $file) {
                         $toBeFixed = true;
                     }
                     if ($verbose || !$excluded) {
-                        output($line, $code, $url, $location, $text);
+                        output($line, $code, $url, $location, $text, $excluded ? 'acceptable redirect' : null);
                     }
                     break;
             }
+        } else if ($verbose) {
+            output($line, 999, $url, null, $text, 'Can\'t be tested');
         }
     }
 }
