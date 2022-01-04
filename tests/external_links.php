@@ -1,7 +1,9 @@
 <?php
 
-$markdownPattern = '\[[^\[]*\]\([^ )]*\)';
-$nakedUrlPattern = 'https?://[^ "<>]*[^ "<>)*,.]';
+$markdownPattern = '\[[^\[]*\]\((https?:)?//[^ )]*\)';
+$htmlPattern = '<a[^>]* href="[^"]*"[^>]*>[^<]*';
+$nakedUrlPattern = '(https?:)?//[^ "<>]*[^ "<>)*,.]';
+$defaultScheme = 'https';
 $verbose = in_array('-v', $argv);
 if ($verbose) {
     array_splice($argv, array_search('-v', $argv), 1);
@@ -16,6 +18,12 @@ $excludedUrls = [
 
 // The redirection itself is not reported as a problem. The redirection target will still be tested.
 $excludedRedirections = [
+    //function ($url, $location) {
+    //    return $location === "$url/";
+    //},
+    //function ($url, $location) {
+    //    return $location === str_replace('http://', 'https://', $url);
+    //},
     function ($url, $location) {
         return $location === str_replace('moodle.org/en/', 'moodle.org/311/en/', $url);
     },
@@ -24,10 +32,29 @@ $excludedRedirections = [
     },
 ];
 
+$excludedFragments = [
+];
+
+function output($line, $code, $url, $location = null, $text = null, $notice = null)
+{
+    $code = str_pad($code, 3, 0, STR_PAD_LEFT);
+    echo "$line: $code $url";
+    if ($location) {
+        echo " → $location";
+    }
+    if ($text) {
+        echo " [$text]";
+    }
+    if ($notice) {
+        echo ": $notice";
+    }
+    echo PHP_EOL;
+}
+
 $toBeFixed = false;
 foreach (array_slice($argv, 1) as $file) {
     echo "\n$file\n";
-    $grep = trim(shell_exec("grep -onE '$markdownPattern|$nakedUrlPattern' $file"));
+    $grep = trim(shell_exec("grep -onE '$markdownPattern|$htmlPattern|$nakedUrlPattern' $file"));
     if (empty($grep)) {
         continue;
     }
@@ -36,8 +63,7 @@ foreach (array_slice($argv, 1) as $file) {
     for ($index = 0; $index < count($grep); ++$index) {
         $link = $grep[$index];
         $matches = [];
-        $isMarkdown = preg_match('/(?P<line>[0-9]+)?:?\[(?P<text>.*)]\((?P<url>.*)\)/', $link, $matches);
-        if ($isMarkdown) {
+        if (preg_match('/(?P<line>[0-9]+)?:?\[(?P<text>.*)]\((?P<url>.*)\)/', $link, $matches) || preg_match('/(?P<line>[0-9]+)?:?<a[^>]* href="(?P<url>[^"]+)"[^>]*>(?P<text>[^<]*)/', $link, $matches)) {
             $url = $matches['url'];
             $text = $matches['text'];
         } else {
@@ -50,33 +76,45 @@ foreach (array_slice($argv, 1) as $file) {
         }
         foreach ($excludedUrls as $excludedUrl) {
             if ($excludedUrl($url)) {
+                if ($verbose) {
+                    output($line, 0, $url, null, $text, 'URL skipped, not tested');
+                }
                 continue 2;
             }
         }
-        $headers = @get_headers($url);
+        $headers = @get_headers('//' === substr($url, 0, 2) ? "$defaultScheme:$url" : $url);
         if ($headers && count($headers)) {
             $firstLinePart = explode(' ', $headers[0]);
             $code = (int)$firstLinePart[1];
             switch ($code) {
                 case 200:
                     $fragmentFound = true;
+                    $excluded = false;
                     if (false !== strpos($url, '#')) {
-                        $contents = file_get_contents($url);
                         $fragment = parse_url($url, PHP_URL_FRAGMENT);
-                        if (false === strpos($contents, "\"$fragment\"")) {
-                            $toBeFixed = true;
-                            $fragmentFound = false;
-                            echo "$line: $code $url [$text]: anchor \"$fragment\" not found.\n";
+                        foreach ($excludedFragments as $excludedFragment) {
+                            if ($excludedFragment($url)) {
+                                $excluded = true;
+                                break;
+                            }
+                        }
+                        if (!$excluded) {
+                            $contents = file_get_contents($url);
+                            if (false === strpos($contents, "\"$fragment\"")) {
+                                $toBeFixed = true;
+                                $fragmentFound = false;
+                                output($line, $code, $url, null, $text, "anchor \"$fragment\" not found.");
+                            }
                         }
                     }
                     if ($verbose && $fragmentFound) {
-                        echo "$line: $code $url [$text]\n";
+                        output($line, $code, $url, null, $text, $excluded ? "anchor \"$fragment\" not tested" : null);
                     }
 
                     break;
                 case 404:
                     $toBeFixed = true;
-                    echo "$line: $code $url [$text]\n";
+                    output($line, $code, $url, null, $text);
                     break;
                 case 301:
                 case 302:
@@ -108,16 +146,19 @@ foreach (array_slice($argv, 1) as $file) {
                     foreach ($excludedRedirections as $excludedRedirection) {
                         if ($excludedRedirection($url, $fullLocation)) {
                             $excluded = true;
+                            break;
                         }
                     }
                     if (!$excluded) {
                         $toBeFixed = true;
                     }
                     if ($verbose || !$excluded) {
-                        echo "$line: $code $url → $location [$text]\n";
+                        output($line, $code, $url, $location, $text, $excluded ? 'acceptable redirect' : null);
                     }
                     break;
             }
+        } else if ($verbose) {
+            output($line, 999, $url, null, $text, 'Can\'t be tested');
         }
     }
 }
