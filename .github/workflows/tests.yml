@@ -14,5 +14,5 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: External Hyperkinks test
+      - name: External Hyperlinks test
         run: php tests/external_links.php *.md
