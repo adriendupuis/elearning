@@ -13,7 +13,7 @@ $resourceFiles = [];
 
 foreach ($usageFilePatterns as $pattern) {
     $usageFiles = array_merge($usageFiles, array_map(function ($path) {
-        return preg_replace('@^./@', '', $path);
+        return preg_replace('@^\./@', '', $path);
     }, explode(PHP_EOL, trim(shell_exec("find . -type f -name '$pattern';")))));
 }
 

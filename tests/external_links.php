@@ -1,8 +1,8 @@
 <?php
 
 $markdownPattern = '\[[^\[]*\]\((https?:)?//[^ )]*\)';
-$htmlPattern = '<a[^>]* href="[^"]*"[^>]*>[^<]*';
-$nakedUrlPattern = '(https?:)?//[^ "<>]*[^ "<>)*,.]';
+$htmlPattern = '<a[^>]* href="[^"]+"[^>]*>[^<]*';
+$nakedUrlPattern = '(https?:)?//[^ "<>]+[^ "<>)*,.]';
 $defaultScheme = 'https';
 $verbose = in_array('-v', $argv);
 if ($verbose) {
