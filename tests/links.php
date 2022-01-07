@@ -684,7 +684,7 @@ class UrlTester
                     return false !== strpos($url, '//example.com');
                 },
                 //function (string $url, string $file = null): bool {
-                //    return false !== strpos($url, '//localhost');
+                //    return (bool) preg_match('@(https?:)?//([a-z]+\.)?localhost(:[0-9]+)?(/|$)@', $url);
                 //},
             ],
             'location' => [
