@@ -735,7 +735,6 @@ class UrlTester
             }
 
             $url = self::formatUrl($testableUrl->getSolvedUrl());
-            $testedUrl = null;
             $testFragment = $fragmentValidity && !$this->isExcludedFragment($testableUrl);
             if (array_key_exists($url, $this->urls) && is_array($this->urls[$url])) {
                 $this->urls[$url][] = $testableUrl;
@@ -744,14 +743,14 @@ class UrlTester
                     continue;
                 }
                 $testableUrl->test(false, $testFragment);
-                if ($testableUrl->getCode() >= $invalidityThreshold) {
-                    $valid = false;
-                }
                 $this->urls[$url] = [$testableUrl];
             }
             $testedUrl = $this->urls[$url][0];
             if ($testedUrl->hasLocation() && $this->isExcludedLocation($testedUrl)) {
                 continue;
+            }
+            if ($testedUrl->getCode() >= $invalidityThreshold) {
+                $valid = false;
             }
             if ($testFragment && $testedUrl->hasFragment() && !$testedUrl->isFragmentFound()) {
                 $this->outputUrl($testableUrl, $testedUrl);
