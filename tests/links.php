@@ -768,7 +768,7 @@ class UrlTester
                     $testedLocation = $location->test(false);
                     $this->urls[$url] = [$testedLocation];
                 }
-                $this->urls[$url] = [$testedUrl];
+                $this->urls[$url][] = $testedUrl;
                 if (($fragmentValidity && $testedLocation->hasFragment() && !$testedLocation->isFragmentFound())
                     || ($testedLocation->getCode() >= $invalidityThreshold)) {
                     $valid = false;
