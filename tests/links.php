@@ -702,10 +702,11 @@ class UrlTester
                 },
             ],
             'fragment' => [
-                function (string $url, string $file = null) {
+                function (string $url, string $file = null): bool {
                     if (in_array($file, ['reveal.js.md'])) {
                         return 0 === strpos($url, '#') || 0 === strpos($url, "$file#");
                     }
+                    return false;
                 }
             ]
         ];
@@ -752,7 +753,7 @@ class UrlTester
             if ($testedUrl->getCode() >= $invalidityThreshold) {
                 $valid = false;
             }
-            if ($testFragment && $testedUrl->hasFragment() && !$testedUrl->isFragmentFound()) {
+            if ($testFragment && 200 == $testedUrl->getCode() && $testedUrl->hasFragment() && !$testedUrl->isFragmentFound()) {
                 $this->outputUrl($testableUrl, $testedUrl);
                 $valid = false;
             } else if ($testedUrl->getCode() >= $verbosityThreshold) {
@@ -769,11 +770,14 @@ class UrlTester
                     $this->urls[$url] = [$testedLocation];
                 }
                 $this->urls[$url][] = $testedUrl;
-                if (($fragmentValidity && $testedLocation->hasFragment() && !$testedLocation->isFragmentFound())
+                if (($fragmentValidity && 200 == $testedUrl->getCode() && $testedLocation->hasFragment() && !$testedLocation->isFragmentFound())
                     || ($testedLocation->getCode() >= $invalidityThreshold)) {
                     $valid = false;
                 }
-                if ($testedUrl->getCode() >= $verbosityThreshold) {
+                if ($testedLocation->getCode() >= $verbosityThreshold) {
+                    if (302 < $verbosityThreshold) {
+                        $this->outputUrl($testableUrl, $testedUrl, false, false);
+                    }
                     $this->outputUrl($location, $testedLocation, false, false);
                 }
                 if (!$location->hasLocation() && $testedLocation->hasLocation()) {
@@ -832,6 +836,7 @@ class UrlTester
                 }
             }
         }
+        $this->output('');
 
         return $valid;
     }
@@ -1039,7 +1044,7 @@ class UrlTestCommand
 
         //TODO: parse $argv to set the Finders
 
-        return new UrlTester($usageFileFinder->find(), $resourceFileFinder - find());
+        return new UrlTester($usageFileFinder->find(), $resourceFileFinder->find());
     }
 }
 
