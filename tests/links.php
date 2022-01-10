@@ -783,7 +783,12 @@ class UrlTester
                 }
             }
         }
-        $this->output('');
+        if (self::VERBOSITY_QUIET > $verbosityThreshold) {
+            if ($valid) {
+                $this->output(PHP_EOL . 'All URLs are targeting existing resources.');
+            }
+            $this->output('');
+        }
 
         return $valid;
     }
@@ -834,7 +839,12 @@ class UrlTester
                 }
             }
         }
-        $this->output('');
+        if (self::VERBOSITY_QUIET > $verbosity) {
+            if ($valid) {
+                $this->output((self::VERBOSITY_LOUD >= $verbosity ? PHP_EOL : '') . 'All resources are used.');
+            }
+            $this->output('');
+        }
 
         return $valid;
     }
