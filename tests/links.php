@@ -1024,20 +1024,6 @@ class Finder
 }
 
 
-class UrlTestCommand
-{
-    static function newUrlTesterFromCommand($argv)
-    {
-        $usageFileFinder = new Finder();
-        $resourceFileFinder = new Finder();
-
-        //TODO: parse $argv to set the Finders
-
-        return new UrlTester($usageFileFinder->find(), $resourceFileFinder->find());
-    }
-}
-
-//$urlTester = UrlTestCommand::newUrlTesterFromCommand($argv);
 $urlTester = new UrlTester(
     (new Finder('.'))
         ->includeName('*.md')
