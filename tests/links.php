@@ -1058,4 +1058,4 @@ $urlTester = new UrlTester(
 $usageTestSuccess = $urlTester->testUsages(/** /300, true, UrlTester::VERBOSITY_LOUD/**/);
 $resourceTestSuccess = $urlTester->testResources(/** /UrlTester::VERBOSITY_LOUD/**/);
 
-exit($usageTestSuccess && $resourceTestSuccess ? 0 : 1);
+exit(1 * !$usageTestSuccess + 2 * !$resourceTestSuccess);
