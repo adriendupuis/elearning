@@ -14,11 +14,5 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: External Hyperlinks test
-        run: php tests/external_links.php *.md
-
       - name: Internal & External Resources test
-        run: php tests/resource_links.php *.md *.html
-
-      - name: Internal Resources Usage test
-        run: php tests/resource_usage.php download/ *.md *.js *.css
+        run: php tests/links.php
