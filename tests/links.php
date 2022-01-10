@@ -614,8 +614,10 @@ class UrlTester
             if (!is_resource($$argumentVariable) || 'stream' !== get_resource_type($$argumentVariable)) {
                 throw new InvalidArgumentException("$argumentVariable must be a stream resource");
             }
-            $this->$argumentVariable = $$argumentVariable;
+            //$this->$argumentVariable = $$argumentVariable;
         }
+        $this->output = $output;
+        $this->error = $error;
         $this->urlExtractor = new UrlExtractor();
     }
 
@@ -676,7 +678,7 @@ class UrlTester
         }
     }
 
-    public static function getDefaultExclusionTests()
+    public static function getDefaultExclusionTests(): array
     {
         return [
             'url' => [
@@ -1058,7 +1060,7 @@ $urlTester = new UrlTester(
     array_merge_recursive(UrlTester::getDefaultExclusionTests(), [
         'fragment' => [
             function (string $url, string $file = null): bool {
-                if (in_array($file, ['reveal.js.md'])) {
+                if ('reveal.js.md' === $file) {
                     return 0 === strpos($url, '#') || 0 === strpos($url, "$file#");
                 }
                 return false;
