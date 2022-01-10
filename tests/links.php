@@ -1045,7 +1045,7 @@ $urlTester = new UrlTester(
         ->includeName('*.css')
         ->find(),
     call_user_func(function (array $a): array {
-        natcasesort($a);
+        asort($a);
         return $a;
     }, array_unique(array_merge(
         (new Finder('./download/'))
