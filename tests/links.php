@@ -688,12 +688,6 @@ class UrlTester
                 //},
             ],
             'location' => [
-                //function (string $url, string $location, string $file = null): bool {
-                //    return $location === "$url/";
-                //},
-                //function (string $url, string $location, string $file = null): bool {
-                //    return $location === str_replace('http://', 'https://', $url);
-                //},
                 function (string $url, string $location, string $file = null): bool {
                     return $location === str_replace('moodle.org/en/', 'moodle.org/311/en/', $url);
                 },
@@ -701,14 +695,7 @@ class UrlTester
                     return $location === str_replace('symfony.com/doc/current/', 'symfony.com/doc/6.0/', $url);
                 },
             ],
-            'fragment' => [
-                function (string $url, string $file = null): bool {
-                    if (in_array($file, ['reveal.js.md'])) {
-                        return 0 === strpos($url, '#') || 0 === strpos($url, "$file#");
-                    }
-                    return false;
-                }
-            ]
+            'fragment' => [],
         ];
     }
 
@@ -1064,7 +1051,17 @@ $urlTester = new UrlTester(
             ->includeName('*.css')
             ->includeName('*.js')
             ->find()
-    ))
+    )),
+    array_merge_recursive(UrlTester::getDefaultExclusionTests(), [
+        'fragment' => [
+            function (string $url, string $file = null): bool {
+                if (in_array($file, ['reveal.js.md'])) {
+                    return 0 === strpos($url, '#') || 0 === strpos($url, "$file#");
+                }
+                return false;
+            },
+        ],
+    ])
 );
 
 $usageTestSuccess = $urlTester->testUsages(/** /300, true, UrlTester::VERBOSITY_LOUD/**/);
