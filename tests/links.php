@@ -1042,7 +1042,10 @@ $urlTester = new UrlTester(
         ->includeName('*.html')
         ->includeName('*.css')
         ->find(),
-    array_unique(array_merge(
+    call_user_func(function (array $a): array {
+        natcasesort($a);
+        return $a;
+    }, array_unique(array_merge(
         (new Finder('./download/'))
             ->includeType(Finder::TYPE_FILE)
             ->find(),
@@ -1051,7 +1054,7 @@ $urlTester = new UrlTester(
             ->includeName('*.css')
             ->includeName('*.js')
             ->find()
-    )),
+    ))),
     array_merge_recursive(UrlTester::getDefaultExclusionTests(), [
         'fragment' => [
             function (string $url, string $file = null): bool {
