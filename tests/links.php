@@ -697,7 +697,16 @@ class UrlTester
                     return $location === str_replace('symfony.com/doc/current/', 'symfony.com/doc/6.0/', $url);
                 },
             ],
-            'fragment' => [],
+            'fragment' => [
+                function (string $url, string $file = null): bool {
+                    if (preg_match('@^(https?:)?//github.com/[^/]+/[^/]+/blob/@', $url)) {
+                        $fragment = parse_url($url, PHP_URL_FRAGMENT);
+                        $contents = file_get_contents(TestableUrl::getUrlWithoutFragment($url));
+                        return false !== strpos($contents, "id=\"user-content-$fragment\"");
+                    }
+                    return false;
+                },
+            ],
         ];
     }
 
