@@ -282,7 +282,7 @@ class TestableUrl
         return parse_url($url, PHP_URL_FRAGMENT);
     }
 
-    public static function getUrlWithoutFragment($url): string
+    public static function getUrlWithoutFragment($url): ?string
     {
         return str_replace('#' . self::getUrlFragment($url), '', $url);
     }
@@ -699,7 +699,7 @@ class UrlTester
             ],
             'fragment' => [
                 function (string $url, string $file = null): bool {
-                    if (preg_match('@^(https?:)?//github.com/[^/]+/[^/]+/blob/@', $url)) {
+                    if (TestableUrl::isUrlWithFragment($url) && preg_match('@^(https?:)?//github.com/[^/]+/[^/]+/blob/@', $url)) {
                         $fragment = parse_url($url, PHP_URL_FRAGMENT);
                         $contents = file_get_contents(TestableUrl::getUrlWithoutFragment($url));
                         return false !== strpos($contents, "id=\"user-content-$fragment\"");
