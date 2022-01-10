@@ -7,13 +7,13 @@ class TestableUrl
     private $url;
 
     /** @var null|string */
-    private $text = null;
+    private $text;
 
     /** @var null|string */
-    private $file = null;
+    private $file;
 
     /** @var null|integer */
-    private $line = null;
+    private $line;
 
     /** @var null|bool */
     private $external = null;
@@ -68,7 +68,7 @@ class TestableUrl
         return $this->url;
     }
 
-    public static function getRelativePath($sourcePath, $targetPath)
+    public static function getRelativePath($sourcePath, $targetPath): string
     {
         $sourcePathInfo = pathinfo($sourcePath);
         $targetPathInfo = pathinfo($targetPath);
@@ -325,7 +325,7 @@ die("\nunit test\n");
 class UrlExtractor
 {
     /** @var array[] */
-    private $patterns = [];
+    private $patterns;
 
     private const PATTERN_DELIMITER = '@';
     private const LINE_PATTERN = '(?P<line>[0-9]+)?:?';
