@@ -21,6 +21,9 @@ class TestableUrl
     /** @var bool */
     private $tested = false;
 
+    /** @var null|string[] */
+    private $headers = null;
+
     /** @var null|int */
     private $code = null;
 
@@ -49,6 +52,7 @@ class TestableUrl
     {
         if (!$this->isTested() || !$cache) {
             $test = self::testUrl($this->getSolvedUrl(), $this->isExternal(), $testFragment);
+            $this->headers = $test['headers'];
             $this->code = $test['code'];
             $this->location = null === $test['location'] ? null : new TestableUrl($test['location'], null, $this->getFile(), $this->getLine(), $testLocations);
             $this->fragmentFound = $test['fragment_found'];
@@ -162,6 +166,7 @@ class TestableUrl
     /** @param null|bool $external */
     public static function testUrl(string $url, bool $external = null, $testFragment = true): array
     {
+        $headers = [];
         $code = self::NOT_TESTABLE_CODE;
         $location = null;
         $fragmentFound = null;
@@ -170,7 +175,6 @@ class TestableUrl
             $external = self::isExternalUrl($url);
         }
 
-        $headers = [];
         if ($external) {
             $defaultScheme = self::DEFAULT_SCHEME;
             $headers = @get_headers('//' === substr($url, 0, 2) ? "$defaultScheme:$url" : $url);
@@ -220,10 +224,17 @@ class TestableUrl
         }
 
         return [
+            'headers' => $headers,
             'code' => $code,
             'location' => $location,
             'fragment_found' => $fragmentFound,
         ];
+    }
+
+    /** @return string[] */
+    public function getHeaders(): ?array
+    {
+        return $this->headers;
     }
 
     public function getCode(): string
@@ -578,6 +589,7 @@ class UrlTester
     /** @var array[] */
     private $exclusionTests = [
         'url' => [],
+        'header' => [],
         'location' => [],
         'fragment' => [],
     ];
@@ -689,6 +701,11 @@ class UrlTester
                 //    return (bool) preg_match('@(https?:)?//([a-z]+\.)?localhost(:[0-9]+)?(/|$)@', $url);
                 //},
             ],
+            'header' => [
+                function (string $url, int $code, array $headers, string $file = null) {
+                    return 403 === $code && in_array('Server: cloudflare', $headers);
+                },
+            ],
             'location' => [
                 function (string $url, string $location, string $file = null): bool {
                     return $location === str_replace('moodle.org/en/', 'moodle.org/311/en/', $url);
@@ -742,6 +759,9 @@ class UrlTester
                     continue;
                 }
                 $testableUrl->test(false, $testFragment);
+                if ($testableUrl->isExternal() && $this->isExcludedHeader($testableUrl)) {
+                    continue;
+                }
                 $this->urls[$url] = [$testableUrl];
             }
             $testedUrl = $this->urls[$url][0];
@@ -854,6 +874,19 @@ class UrlTester
         foreach ($this->exclusionTests['url'] as $test) {
             if ($test(self::formatUrl($testableUrl->getSolvedUrl()), $testableUrl->getFile())) {
                 return true;
+            }
+        }
+        return false;
+    }
+
+    public function isExcludedHeader(TestableUrl $testableUrl): bool
+    {
+        $headers = $testableUrl->getHeaders();
+        if ($testableUrl->isExternal() && !empty($headers)) {
+            foreach ($this->exclusionTests['header'] as $test) {
+                if ($test(self::formatUrl($testableUrl->getSolvedUrl()), (int)$testableUrl->getCode(), $headers)) {
+                    return true;
+                }
             }
         }
         return false;
