@@ -166,7 +166,7 @@ class TestableUrl
     /** @param null|bool $external */
     public static function testUrl(string $url, bool $external = null, $testFragment = true): array
     {
-        $headers = [];
+        $headers = null;
         $code = self::NOT_TESTABLE_CODE;
         $location = null;
         $fragmentFound = null;
@@ -232,9 +232,9 @@ class TestableUrl
     }
 
     /** @return string[] */
-    public function getHeaders(): ?array
+    public function getHeaders(): array
     {
-        return $this->headers;
+        return $this->headers ?: [];
     }
 
     public function getCode(): string
