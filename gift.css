@@ -1,4 +1,4 @@
-.ui-draggable, .ui-sortable-handle, label, button {
+.ui-draggable-handle, .ui-sortable-handle, label, button {
     cursor: pointer;
 }
 .reveal pre {
