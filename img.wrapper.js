@@ -1,15 +1,17 @@
 function wrapImg() {
     $('img').each(function () {
-        //let img = new Image();
-        //img.src = this.src;
-        let img = this;
+        let img = new Image();
+        img.src = this.src;
         let height = img.height;
         let width = img.width;
 
-        if ('undefined' === typeof $(this).attr('style') || !$(this).attr('style').match(/(^|; *)(min-|max-)?(width|height):/)) {
+        if (('undefined' === typeof $(this).attr('style') || !$(this).attr('style').match(/(^|; *)(min-|max-)?(width|height):/))
+            && 'undefined' === typeof $(this).attr('width') && 'undefined' === typeof $(this).attr('height')) {
             let thumbWidth = height > width ? 64 * width / height : 64;
             let thumbHeight = height >= width ? 64 : 64 * height / width;
             $(this).width(thumbWidth).height(thumbHeight);
+        } else if (width <= $(this).width() || height <= $(this).height()) {
+            return;
         }
 
         if (width > $('body').width() || height > $('body').height()) {
