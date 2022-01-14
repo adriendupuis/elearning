@@ -705,6 +705,9 @@ class UrlTester
                 function (string $url, int $code, array $headers, string $file = null) {
                     return 403 === $code && in_array('Server: cloudflare', $headers);
                 },
+                function (string $url, int $code, array $headers, string $file = null) {
+                    return 403 === $code && false !== strpos($url, '//upload.wikimedia.org/');
+                },
             ],
             'location' => [
                 function (string $url, string $location, string $file = null): bool {

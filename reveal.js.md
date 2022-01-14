@@ -45,6 +45,11 @@ some:
 
 Skeleton is provided in [this zip archive: skeleton.zip](./download/skeleton.zip)
 
+<img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/A_professor_asking_a_medical_student_his_prognosis_for_a_par_Wellcome_V0011614.jpg" />
+<img style="width: 119px; height: 172px;" src="https://upload.wikimedia.org/wikipedia/commons/a/ac/A_professor_asking_a_medical_student_his_prognosis_for_a_par_Wellcome_V0011614.jpg" />
+<img style="width: 108px;" src="https://upload.wikimedia.org/wikipedia/commons/8/87/Skeletons.png" />
+<img width="323" src="https://upload.wikimedia.org/wikipedia/commons/8/87/Skeletons.png" />
+
 --
 
 ## Part 2.2

@@ -1,0 +1,42 @@
+.popin-container {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.popin-overlay {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    opacity: 0.9;
+}
+
+.popin-content-container {
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+}
+
+.popin-content-container > img.popin-image {
+    /*
+    Use when the <img> is alone in the pop-in, not when its part of a mixed HTML content.
+    .popin-content-container line-heigth must equal viewport height.
+    */
+    vertical-align: middle;
+    box-shadow: 0px 0px 40px 40px white;
+}
+
+.clickable {
+    cursor: pointer;
+}

@@ -5,6 +5,7 @@
     <link href="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/dist/reveal.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/dist/theme/white.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/plugin/highlight/monokai.css" rel="stylesheet">
+    <link href="./popin.css" rel="stylesheet">
 </head>
 <body>
 <div class="reveal">
@@ -24,6 +25,8 @@
 <script src="https://cdn.jsdelivr.net/gh/pipwerks/scorm-api-wrapper@master/src/JavaScript/SCORM_API_wrapper.js"></script>
 <script>pipwerks.debug.isActive = 'localhost' === document.location.hostname;</script>
 
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script src="./popin.js"></script>
 <script src="./scorm.utils.js"></script>
 <script src="./reveal.utils.js"></script>
 <script src="./scorm.reveal.js"></script>
@@ -34,8 +37,8 @@
         history: true,
         center: false,
         hideInactiveCursor: false,
-        width: '100%',
-        height: '100%',
+        // width: '100%',
+        // height: '100%',
         margin: 0,
         plugins: [RevealMarkdown, RevealHighlight]
     });
