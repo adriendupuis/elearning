@@ -1,3 +1,21 @@
+function popin(html) {
+    $('<div class="popin-container" style="position: absolute; z-index: 1; top: 0; left: 0; width: 100%; height: 100%;">')
+        .click(function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            $('[class^="popin-"]').remove();
+        })
+        .append('<div class="popin-overlay" style="position: absolute; z-index: 2; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0.9;">')
+        .append($('<div class="popin-content-container" style="position: absolute; z-index: 3; top: 0; left: 0; width: 100%; height: 100%; line-height: 100%; text-align: center;">').html(html))
+        .appendTo('body')
+        .find('.popin-content-container').css('line-height', $('body').height() + 'px')
+    ;
+}
+
+function popinImg(src) {
+    popin('<img src="' + src + '" class="popin-image" style="vertical-align: middle; box-shadow: 0px 0px 40px 40px white;">');
+}
+
 function wrapImg() {
     $('img').each(function () {
         let img = new Image();
@@ -22,20 +40,4 @@ function wrapImg() {
             }).addClass('clickable');
         }
     });
-}
-
-function popinImg(src) {
-    let close = function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        $('[class^="popin-"]').remove();
-    };
-    $('<div class="popin-container" style="position: absolute; z-index: 1; top: 0; left: 0; width: 100%; height: 100%;">')
-        .click(close)
-        .append('<div class="popin-overlay" style="position: absolute; z-index: 2; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0.9;">')
-        .append('<div class="popin-image-container" style="position: absolute; z-index: 3; top: 0; left: 0; width: 100%; height: 100%; line-height: 100%; text-align: center;">'
-            + '<img src="' + src + '" class="popin-image" style="vertical-align: middle; box-shadow: 0px 0px 40px 40px white;">')
-        .appendTo('body')
-        .find('.popin-image-container').css('line-height', $('body').height() + 'px')
-    ;
 }
