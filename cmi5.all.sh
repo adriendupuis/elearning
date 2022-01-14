@@ -1,4 +1,4 @@
-cmi5Reveal='cmi5.reveal.js reveal.utils.js cmi5.utils.js';
+cmi5Reveal='cmi5.reveal.js reveal.utils.js cmi5.utils.js popin.js popin.css';
 cmi5Gift='gift.css gift.js cmi5.gift.js array.shuffle.js jqueryui.matching.* cmi5.utils.js';
 
 # ./cmi5.sh OUTPUT_FILE TITLE INDEX_FILE RESOURCE_FILES… $cmi5(Reveal|Gift)

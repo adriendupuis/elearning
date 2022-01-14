@@ -1,4 +1,4 @@
-scormReveal='scorm.reveal.js reveal.utils.js scorm.utils.js';
+scormReveal='scorm.reveal.js reveal.utils.js scorm.utils.js popin.js popin.css';
 scormGift='gift.css gift.js scorm.gift.js array.shuffle.js jqueryui.matching.* scorm.utils.js';
 
 # ./scorm.sh OUTPUT_FILE TITLE INDEX_FILE RESOURCE_FILES… $scorm(Reveal|Gift)

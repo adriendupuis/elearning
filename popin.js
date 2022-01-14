@@ -1,19 +1,19 @@
 function popin(html) {
-    $('<div class="popin-container" style="position: absolute; z-index: 1; top: 0; left: 0; width: 100%; height: 100%;">')
+    $('<div class="popin-container">')
         .click(function (event) {
             event.preventDefault();
             event.stopPropagation();
             $('[class^="popin-"]').remove();
         })
-        .append('<div class="popin-overlay" style="position: absolute; z-index: 2; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0.9;">')
-        .append($('<div class="popin-content-container" style="position: absolute; z-index: 3; top: 0; left: 0; width: 100%; height: 100%; line-height: 100%; text-align: center;">').html(html))
+        .append('<div class="popin-overlay">')
+        .append($('<div class="popin-content-container">').html(html))
         .appendTo('body')
-        .find('.popin-content-container').css('line-height', $('body').height() + 'px')
     ;
 }
 
 function popinImg(src) {
-    popin('<img src="' + src + '" class="popin-image" style="vertical-align: middle; box-shadow: 0px 0px 40px 40px white;">');
+    popin('<img src="' + src + '" class="popin-image">');
+    $('.popin-content-container').css('line-height', $('body').height() + 'px')
 }
 
 function wrapImg() {
