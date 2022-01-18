@@ -30,8 +30,8 @@ $.widget('custom.matching', {
                 let previousDroppable = currentDraggable.data('droppable');
                 if (previousDraggable) {
                     if (previousDroppable) {
-                        let currentDroppablePosition = currentDroppable.position();
-                        let previousDroppablePosition = previousDroppable.position();
+                        let currentDroppablePosition = currentDroppable.find('.ui-droppable').length ? currentDroppable.find('.ui-droppable').position() : currentDroppable.position();
+                        let previousDroppablePosition = previousDroppable.find('.ui-droppable').length ? previousDroppable.find('.ui-droppable').position() : previousDroppable.position();
                         previousDraggable.css({
                             top: '+=' + (previousDroppablePosition.top - currentDroppablePosition.top),
                             left: '+=' + (previousDroppablePosition.left - currentDroppablePosition.left),
