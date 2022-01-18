@@ -632,7 +632,7 @@ class GiftQuestion {
     }
 
     static unescapeSpecialCharacters(code) {
-        return code.replace(/\\([~=#{}])/g, '$1');
+        return code.replace(/\\([~=#{}:])/g, '$1');
     }
 
     static addNewLines(code) {
