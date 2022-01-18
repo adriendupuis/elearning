@@ -395,7 +395,6 @@ class Question {
     text = null;
     responses = [];
     weight = 1;
-    startTime = null;
     lastTime = null;
     stopTime = null;
     latency = 0;
@@ -469,9 +468,6 @@ class Question {
     }
 
     start() {
-        if (null === this.startTime) {
-            this.startTime = new Date();
-        }
         if (null === this.lastTime) {
             this.lastTime = new Date();
         }
@@ -483,10 +479,6 @@ class Question {
         this.latency = this.stopTime.getTime() - this.lastTime.getTime();
         this.lastTime = null;
         return this;
-    }
-
-    getStartTime() {
-        return this.startTime;
     }
 
     getStopTime() {
@@ -792,13 +784,12 @@ class MatchingQuestion extends Question {
             });
 
             $.each(this.getElement().matching('getMatches'), function (index, match) {
-                let correct = false;
                 let sourceIndex = null, targetIndex = null;
                 $.each(this.getResponses(), function (index, response) {
-                    if ($(match[0]).text().trim() == response[0]) {
+                    if ($(match[0]).text().trim() === response[0]) {
                         sourceIndex = index;
                     }
-                    if ($(match[1]).text().trim() == response[1]) {
+                    if ($(match[1]).text().trim() === response[1]) {
                         targetIndex = index;
                     }
                     if (null !== sourceIndex && null !== targetIndex) {
