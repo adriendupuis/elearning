@@ -540,18 +540,19 @@ class Question {
 
 class GiftQuestion {
     static parse(code) {
-        let titleRegExp = /::([^:]+)::/;
+        let titleRegExp = /::([^:]+)::\n?/;
 
         let openingBracketIndex = GiftQuestion.indexOfSpecialCharacter(code, '{');
         let closingBracketIndex = GiftQuestion.indexOfSpecialCharacter(code, '}');
 
-        let text = code.substring(0, openingBracketIndex).trim();
+        let text = code.substring(0, openingBracketIndex);
         let title = null, titleMatch = titleRegExp.exec(text);
         let id = null;
         if (null !== titleMatch) {
-            title = titleMatch[1].trim();
-            text = text.replace(titleRegExp, '').trim();
+            title = this.formatText(titleMatch[1]);
+            text = text.replace(titleRegExp, '');
         }
+        text = this.formatText(text);
 
         let responsesCode = code.substring(openingBracketIndex + 1, closingBracketIndex).trim();
 
