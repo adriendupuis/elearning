@@ -46,17 +46,18 @@ $.widget('custom.matching', {
                     if (previousDroppable) {
                         let currentDroppablePosition = currentDroppable.find('.ui-droppable').length ? currentDroppable.find('.ui-droppable').position() : currentDroppable.position();
                         let previousDroppablePosition = previousDroppable.find('.ui-droppable').length ? previousDroppable.find('.ui-droppable').position() : previousDroppable.position();
+                        let transform = $('.reveal > .slides').css('transform').match(/matrix\(([-.0-9]+), ([-.0-9]+), ([-.0-9]+), ([-.0-9]+), ([-.0-9]+), ([-.0-9]+)\)/);
+                        let scale = transform ? transform[1] : 1;
                         previousDraggable.css({
-                            top: '+=' + (previousDroppablePosition.top - currentDroppablePosition.top),
-                            left: '+=' + (previousDroppablePosition.left - currentDroppablePosition.left),
+                            top: '+=' + (previousDroppablePosition.top - currentDroppablePosition.top)/scale,
+                            left: '+=' + (previousDroppablePosition.left - currentDroppablePosition.left)/scale,
                         });
                         previousDroppable.data('draggable', previousDraggable);
                         previousDroppable.addClass('matched');
                         previousDraggable.data('droppable', previousDroppable);
                         previousDraggable.addClass('matched');
                     } else {
-                        //previousDraggable.css(previousDraggable.originalPosition);
-                        previousDraggable.css({top: 0, left: 0});
+                        previousDraggable.css(previousDraggable.originalPosition);
                         previousDraggable.data('droppable', null);
                         previousDraggable.removeClass('matched');
                     }
@@ -122,10 +123,7 @@ $(function () {
                 return false;
             }
 
-            let transform = $('.reveal > .slides').css('transform').match(/matrix\(([-.0-9]+), ([-.0-9]+), ([-.0-9]+), ([-.0-9]+), ([-.0-9]+), ([-.0-9]+)\)/);
-            let scale = transform ? transform[1] : 1;
             let zoom = $('.reveal > .slides > section.present').css('zoom') ? $('.reveal > .slides > section.present').css('zoom') : 1;
-            var zoomScale = zoom * scale;
 
             var x1 = draggable.offset.left + draggable.position.left - draggable.originalPosition.left + draggable.margins.left, //here is the fix for scaled container
                 y1 = draggable.offset.top + draggable.position.top - draggable.originalPosition.top + draggable.margins.top, //here is the fix for scaled container
@@ -145,8 +143,8 @@ $(function () {
                         t < y1 + (draggable.helperProportions.height / 2) && // Bottom Half
                         y2 - (draggable.helperProportions.height / 2) < b); // Top Half
                 case "pointer":
-                    return isOverAxis(event.pageY/zoomScale, t, droppable.proportions().height) &&
-                        isOverAxis(event.pageX/zoomScale, l, droppable.proportions().width);
+                    return isOverAxis(event.pageY/zoom, t, droppable.proportions().height) &&
+                        isOverAxis(event.pageX/zoom, l, droppable.proportions().width);
                 case "touch":
                     return (
                         (y1 >= t && y1 <= b) || // Top edge touching
