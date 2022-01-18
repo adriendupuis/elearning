@@ -71,9 +71,9 @@ $.widget('custom.matching', {
             }
         })
     },
-    getMatches: function() {
+    getMatches: function () {
         let matches = [];
-        this.element.find(this.options.droppable).each(function(index, droppable) {
+        this.element.find(this.options.droppable).each(function (index, droppable) {
             let draggable = $(droppable).data('draggable');
             if (draggable) {
                 if ($(droppable).is(this.options.source)) {
