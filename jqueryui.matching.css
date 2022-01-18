@@ -1,3 +1,7 @@
+.matching {
+    padding-right: 25%;
+}
+
 .matching-target,
 .matching-source .handle,
 .matching-target .handle {
