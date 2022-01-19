@@ -269,10 +269,23 @@ class Gift {
     }
 
     submit(exit = this.options.Plugin.constructor.normalExit) {
+        //timeout or submit slide
+        let timeSpent = (new Date().getTime() - this.testStartTime.getTime()) / 1000;
+        let timeLeft = Math.round(this.options.testTime - timeSpent);
+        let submitIndices = this.options.Reveal.getIndices(this.getSubmitSlide()[0]);
+        if (0 < timeLeft) {
+            let currentIndices = this.options.Reveal.getIndices();
+            if (currentIndices.h !== submitIndices.h || currentIndices.v !== submitIndices.v) {
+                this.log('runtime error: submit triggered while some time remains and not on the submit slide.');
+                $(this.options.timerContainer).show();
+                //TODO: Run timer if stopped
+                return;
+            }
+        }
+
         $(this.options.testSubmitButton).hide();
         if (exit !== this.options.Plugin.constructor.normalExit) {
-            let indices = this.options.Reveal.getIndices(this.getSubmitSlide()[0]);
-            this.options.Reveal.slide(indices.h, indices.v);
+            this.options.Reveal.slide(submitIndices.h, submitIndices.v);
         }
         clearInterval(this.testTimerId);
         if (this.submitted) {
