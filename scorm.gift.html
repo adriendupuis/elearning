@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/dist/reveal.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/dist/theme/white.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/plugin/highlight/monokai.css" rel="stylesheet">
+    <link href="./jqueryui.matching.css" rel="stylesheet">
+    <link href="./gift.css" rel="stylesheet">
+</head>
+<body>
+<div class="timer" style="display: none;">00:00</div>
+<div class="reveal">
+    <div class="slides">
+        <section data-charset="utf-8"
+                 data-markdown="./gift.md"
+                 data-separator="^\n---\n$"
+                 data-separator-vertical="^\n--\n$">
+        </section>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/plugin/highlight/highlight.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+
+<script src="https://cdn.jsdelivr.net/gh/pipwerks/scorm-api-wrapper@master/src/JavaScript/SCORM_API_wrapper.js"></script>
+
+<script src="./array.shuffle.js"></script>
+<script src="./jqueryui.matching.js"></script>
+<script src="./scorm.utils.js"></script>
+<script src="./gift.js"></script>
+<script src="./scorm.gift.js"></script>
+
+<script>
+    Reveal.initialize({
+        slideNumber: 'c/t',
+        history: true,
+        center: false,
+        hideInactiveCursor: false,
+        width: '100%',
+        height: '100%',
+        margin: 0,
+        highlight: {
+           highlightOnLoad: false
+        },
+        plugins: [RevealMarkdown, RevealHighlight]
+    }).then(function() {
+        let gift;
+        if ('localhost' === document.location.hostname) {
+            gift = new Gift('./gift.dirty.txt', {debug: true, Plugin: new ScormGift(), testTime: 360, timerWarningRatio: 1 / 2});
+        } else {
+            gift = new Gift('./gift.encoded.txt', {Plugin: new ScormGift(), testTime: 120, randomize: true, subset: 5, score: '67%'});
+        }
+
+        Reveal.configure({slideNumber: gift.slideNumber.bind(gift)});
+    });
+</script>
+</body>
+</html>

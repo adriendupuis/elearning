@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/dist/reveal.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/dist/theme/white.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/plugin/highlight/monokai.css" rel="stylesheet">
+</head>
+<body>
+<div class="reveal">
+    <div class="slides">
+        <section data-charset="utf-8"
+                 data-markdown="./reveal.js.md"
+                 data-separator="^\n---\n$"
+                 data-separator-vertical="^\n--\n$">
+        </section>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.1.2/plugin/highlight/highlight.js"></script>
+
+<!-- https://github.com/adlnet/CATAPULT/blob/main/course_examples/single_au_basic_framed/ -->
+<script src="https://cdn.jsdelivr.net/gh/adlnet/CATAPULT@main/course_examples/single_au_basic_framed/js/cmi5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/adlnet/CATAPULT@main/course_examples/single_au_basic_framed/js/course_cmi5.js"></script>
+<script>Cmi5.enableDebug();</script>
+
+<script src="./cmi5.utils.js"></script>
+<script src="./reveal.utils.js"></script>
+<script src="./cmi5.reveal.js"></script>
+
+<script>
+    Reveal.initialize({
+        slideNumber: 'c/t',
+        history: true,
+        center: false,
+        hideInactiveCursor: false,
+        width: '100%',
+        height: '100%',
+        margin: 0,
+        plugins: [RevealMarkdown, RevealHighlight]
+    });
+</script>
+</body>
+</html>

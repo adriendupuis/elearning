@@ -1,0 +1,28 @@
+.matching-target,
+.matching-source .handle,
+.matching-target .handle {
+    display: inline-block;
+}
+.matching-source .handle, .matching-target .handle {
+    width: 1em;
+    height: 1.1em;
+}
+
+.matching-source .handle.hover {
+    background: silver;
+}
+.matching-source .handle::after {
+    content: '⇲';
+}
+
+.matching-target .handle {
+    cursor: pointer;
+}
+.matching-target .handle::after {
+    content: '⎋';
+}
+
+.matching-source.matched .handle::after,
+.matching-target.matched .handle::after {
+    content: '⌀';
+}

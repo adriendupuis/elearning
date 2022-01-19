@@ -1,0 +1,29 @@
+name: Release Asset
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          set -x
+          tag_name=${GITHUB_REF##*/}
+          bash cmi5.all.sh
+          bash scorm.all.sh
+          for asset in ./release/*.zip; do
+            mv -- "$asset" "${asset%.zip}.$tag_name.zip"
+          done
+          assets=()
+          for asset in ./release/*.zip; do
+            assets+=(-a $asset)
+          done
+          tag_name=${GITHUB_REF##*/}
+          hub release edit ${assets[@]} -m $tag_name $tag_name
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
