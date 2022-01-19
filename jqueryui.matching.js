@@ -57,7 +57,7 @@ $.widget('custom.matching', {
                         previousDraggable.data('droppable', previousDroppable);
                         previousDraggable.addClass('matched');
                     } else {
-                        previousDraggable.css(previousDraggable.originalPosition);
+                        previousDraggable.css({top: 0, left: 0});
                         previousDraggable.data('droppable', null);
                         previousDraggable.removeClass('matched');
                     }
