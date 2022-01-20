@@ -441,7 +441,7 @@ class UrlExtractor
                 '(?P<url>(https?:)?//[^ "<>]+[^ "<>)*,.\`])',
             ],
             'css' => [
-                'url\(["\']?(?P<url>[^)]*)["\']?\)',
+                'url\(["\']?(?P<url>[^)"\']*)["\']?\)',
             ],
             'scss' => [
                 'css',
@@ -722,6 +722,9 @@ class UrlTester
                         return false !== strpos($contents, "id=\"user-content-$fragment\"");
                     }
                     return false;
+                },
+                function (string $url, string $file = null): bool {
+                    return preg_match('@\.eot\?#@', $url);
                 },
             ],
         ];
