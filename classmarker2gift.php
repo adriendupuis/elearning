@@ -22,6 +22,9 @@ if (false !== ($fileHandle = fopen($argv[1], 'r'))) {
             echo "::$questionId::\n";
             $question = formatText($assocRowCells['Question']);
             echo "$question {\n";
+
+            $correctFeedback = empty($assocRowCells['Correct Feedback']) ? '' : "#{$assocRowCells['Correct Feedback']}";
+            $incorrectFeedback = empty($assocRowCells['Incorrect Feedback']) ? '' : "#{$assocRowCells['Incorrect Feedback']}";
             switch ($questionType) {
                 case 'matching':
                     {
@@ -45,8 +48,10 @@ if (false !== ($fileHandle = fopen($argv[1], 'r'))) {
                             if (empty($answer)) {
                                 break;
                             }
-                            $correctness = in_array($letter, $correct) ? '=' : '~';
-                            echo "  $correctness$answer\n";
+                            $isCorrect = in_array($letter, $correct);
+                            $correctness = $isCorrect ? '=' : '~';
+                            $feedback = $isCorrect ? $correctFeedback : $incorrectFeedback;
+                            echo "  $correctness$answer$feedback\n";
                             $answerCount++;
                         }
                         if ($protectAllRightChoicesAgainstFillInQuestion && $answerCount === count($correct)) {
@@ -58,7 +63,10 @@ if (false !== ($fileHandle = fopen($argv[1], 'r'))) {
                 case 'truefalse':
                     {
                         $correctness = 'A' === $assocRowCells['Correct'] ? 'T' : 'F';
-                        echo "  $correctness\n";
+                        if (!empty($correctFeedback) && empty($incorrectFeedback)) {
+                            $incorrectFeedback = '#';//TODO: Check if incorrect can be empty
+                        }
+                        echo "  $correctness$incorrectFeedback$correctFeedback\n";
                     }
                     break;
                 default:
