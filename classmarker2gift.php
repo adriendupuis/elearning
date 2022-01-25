@@ -80,5 +80,5 @@ function formatText($code) {
 }
 
 function escapeSpecialCharacters($code) {
-    return preg_replace('/([~=#{}])/', '\\\$1', $code);
+    return preg_replace('/([~=#{}:])/', '\\\$1', $code);
 }
