@@ -1,5 +1,6 @@
 <?php
 //TODO: Is it working with every CSV export config?
+$protectAllRightChoicesAgainstFillInQuestion = true;
 
 $rowIndex = 1;
 if (false !== ($fileHandle = fopen($argv[1], 'r'))) {
@@ -17,7 +18,8 @@ if (false !== ($fileHandle = fopen($argv[1], 'r'))) {
         $questionType = $rowCells[0];
 
         if (!empty($questionType)) {
-            echo "::Q${assocRowCells['Question Id']}::\n";
+            $questionId = "Q${assocRowCells['Question Id']}";
+            echo "::$questionId::\n";
             $question = formatText($assocRowCells['Question']);
             echo "$question {\n";
             switch ($questionType) {
@@ -37,6 +39,7 @@ if (false !== ($fileHandle = fopen($argv[1], 'r'))) {
                 case 'multipleresponse':
                     {
                         $correct = explode(',', $assocRowCells['Correct']);
+                        $answerCount = 0;
                         foreach (range('A', 'Z') as $letter) {
                             $answer = formatText($assocRowCells["Answer $letter"]);
                             if (empty($answer)) {
@@ -44,6 +47,11 @@ if (false !== ($fileHandle = fopen($argv[1], 'r'))) {
                             }
                             $correctness = in_array($letter, $correct) ? '=' : '~';
                             echo "  $correctness$answer\n";
+                            $answerCount++;
+                        }
+                        if ($protectAllRightChoicesAgainstFillInQuestion && $answerCount === count($correct)) {
+                            fwrite(STDERR, "Warning: Add temporary wrong choice to $questionId to not have it interpreted as a fill-in question.\n");
+                            echo '  ~TEMPORARY wrong answer to keep "choice" question in the right type. Please, remove.'."\n";
                         }
                     }
                     break;
@@ -55,11 +63,11 @@ if (false !== ($fileHandle = fopen($argv[1], 'r'))) {
                     break;
                 default:
                     {
-                        fwrite(STDERR, "Unknown question type '$questionType'.");
+                        fwrite(STDERR, "Error: Unknown question type '$questionType'.\n");
                     }
                     break;
             }
-            echo "}\n";
+            echo "}\n\n";
         }
 
         $rowIndex++;
