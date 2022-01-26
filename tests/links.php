@@ -1079,12 +1079,165 @@ class Finder
 }
 
 
-$urlTester = new UrlTester(
-    (new Finder('.'))
+class UrlTestCommand
+{
+    private static function buildFinder($where, $minDepth = null, $maxDepth = null, $includedNames = [], $excludedNames = [], $includedTypes = [], $excludedTypes = []): Finder
+    {
+        $finder = new Finder($where, $minDepth, $maxDepth);
+        foreach ($includedNames as $includedName) {
+            $finder->includeName($includedName);
+        }
+        foreach ($excludedNames as $excludedName) {
+            $finder->excludeName($excludedName);
+        }
+        foreach ($includedTypes as $includedType) {
+            $finder->includeType($includedType);
+        }
+        foreach ($excludedTypes as $excludedType) {
+            $finder->excludeType($excludedType);
+        }
+
+        return $finder;
+    }
+
+    static function newUrlTesterFromCommand($argv)
+    {
+        $finders = [
+            'usage' => [],
+            'resource' => [],
+        ];
+
+        if (false !== strpos(__FILE__, $argv[0])) {
+            array_shift($argv);
+        }
+
+        $finished = false;
+        $currentCategory = null;
+        $nextCategory = null;
+        $where = null;
+        $minDepth = null;
+        $maxDepth = null;
+        $includedNames = [];
+        $excludedNames = [];
+        $includedTypes = [];
+        while (!empty($argv)) {
+            $arg = array_shift($argv);
+            switch ($arg) {
+                case '-u':
+                case '--usage':
+                case '--usages':
+                {
+                    $finished = true;
+                    $nextCategory = 'usage';
+                    break;
+                }
+                case '-r':
+                case '--resource':
+                case '--resources':
+                {
+                    $finished = true;
+                    $nextCategory = 'resource';
+                    break;
+                }
+                case '(':
+                    break;
+                case ')':
+                    $finished = true;
+                    break;
+                case '-n':
+                case '--inn':
+                case '--name':
+                case '--in-name':
+                case '--include-name':
+                case '--included-name':
+                    $includedNames[] = array_shift($argv);
+                    break;
+                case '-en':
+                case '-nn':
+                case '--exn':
+                case '--ex-name':
+                case '--not-name':
+                case '--exclude-name':
+                case '--excluded-name':
+                    $excludedNames[] = array_shift($argv);
+                    break;
+                case '-t':
+                case '--int':
+                case '--type':
+                case '--include-type':
+                case '--included-type':
+                    $includedTypes[] = array_shift($argv);
+                    break;
+                case '-et':
+                case '-nt':
+                case '--ext':
+                case '--ex-type':
+                case '--not-type':
+                case '--exclude-type':
+                case '--excluded-type':
+                    $excludedTypes[] = array_shift($argv);
+                    break;
+                case '--mind':
+                case '--mindepth':
+                    $minDepth = array_shift($argv);
+                    break;
+                case '--maxd':
+                case '--maxdepth':
+                    $maxDepth = array_shift($argv);
+                    break;
+                default:
+                case '-d':
+                case '--dir';
+                case '--directory';
+                    $where = $arg;
+            }
+
+            if ($finished || empty($argv)) {
+                if (!empty($currentCategory) && array_key_exists($currentCategory, $finders) && !empty($where)) {
+                    $finders[$currentCategory][] = self::buildFinder($where, $minDepth, $maxDepth, $includedNames, $excludedNames, $includedTypes, $excludedTypes ?? []);
+                }
+
+                $finished = false;
+                $currentCategory = $nextCategory ?: $currentCategory;
+                $nextCategory = null;
+                $where = null;
+                $minDepth = null;
+                $maxDepth = null;
+                $includedNames = [];
+                $excludedNames = [];
+                $includedTypes = [];
+            }
+        }
+
+        $files = [
+            'usage' => [],
+            'resource' => [],
+        ];
+
+        foreach (array_keys($finders) as $category) {
+            foreach ($finders[$category] as $finder) {
+                $files[$category] = array_merge($files[$category], $finder->find());
+            }
+            $files[$category] = call_user_func(function (array $a): array {
+                asort($a);
+                return $a;
+            }, array_unique($files[$category]));
+        }
+
+        return new UrlTester($files['usage'], $files['resource']);
+    }
+}
+
+// php tests/links.php --usage -d . -n '*.md' -n '*.html' -n '*.css' --resource \( ./download/ -t f \) \( . --mind 1 --maxd 1 -n '*.md' -n '*.css' -n '*.js' -en README.md \);
+$urlTester = 1 < $argc ? UrlTestCommand::newUrlTesterFromCommand($argv) : new UrlTester(
+    call_user_func(function (array $a): array {
+        asort($a);
+        return $a;
+    }, (new Finder('.'))
         ->includeName('*.md')
         ->includeName('*.html')
         ->includeName('*.css')
-        ->find(),
+        ->find()),
     call_user_func(function (array $a): array {
         asort($a);
         return $a;
