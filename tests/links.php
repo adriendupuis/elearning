@@ -187,15 +187,15 @@ class TestableUrl
         }
 
         switch ($code) {
-            case 200:
+            case 200: // OK
                 if ($testFragment && self::isUrlWithFragment($url)) {
                     $fragment = self::getUrlFragment($url);
                     $contents = @file_get_contents(self::getUrlWithoutFragment($url));
                     $fragmentFound = $contents && false !== strpos($contents, "\"$fragment\"");
                 }
                 break;
-            case 301:
-            case 302:
+            case 301: // Moved Permanently
+            case 302: // Found
                 foreach ($headers as $header) {
                     if (0 === strpos(strtolower($header), 'location: ')) {
                         if (false !== preg_match('/^[Ll]ocation: (?P<location>.*)$/', $header, $matches)) {
@@ -217,9 +217,10 @@ class TestableUrl
                     }
                 }
                 break;
-            case 403:
-            case 404:
-            case 500:
+            case 400: // Bad Request
+            case 403: // Forbidden
+            case 404: // Not Found
+            case 500: // Internal Server Error
             default:
         }
 
