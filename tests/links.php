@@ -218,6 +218,7 @@ class TestableUrl
                 }
                 break;
             case 400: // Bad Request
+            case 401: // Unauthorized
             case 403: // Forbidden
             case 404: // Not Found
             case 500: // Internal Server Error
