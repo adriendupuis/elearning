@@ -1102,7 +1102,7 @@ class UrlTestCommand
         return $finder;
     }
 
-    static function newUrlTesterFromCommand($argv)
+    static function newUrlTesterFromCommand($argv, $exclusionTests = null)
     {
         $finders = [
             'usage' => [],
@@ -1226,12 +1226,23 @@ class UrlTestCommand
             }, array_unique($files[$category]));
         }
 
-        return new UrlTester($files['usage'], $files['resource']);
+        return new UrlTester($files['usage'], $files['resource'], $exclusionTests);
     }
 }
 
+$exclusionTests = array_merge_recursive(UrlTester::getDefaultExclusionTests(), [
+    'fragment' => [
+        function (string $url, string $file = null): bool {
+            if ('reveal.js.md' === $file) {
+                return 0 === strpos($url, '#') || 0 === strpos($url, "$file#");
+            }
+            return false;
+        },
+    ],
+]);
+
 // php tests/links.php --usage -d . -n '*.md' -n '*.html' -n '*.css' --resource \( ./download/ -t f \) \( . --mind 1 --maxd 1 -n '*.md' -n '*.css' -n '*.js' -en README.md \);
-$urlTester = 1 < $argc ? UrlTestCommand::newUrlTesterFromCommand($argv) : new UrlTester(
+$urlTester = 1 < $argc ? UrlTestCommand::newUrlTesterFromCommand($argv, $exclusionTests) : new UrlTester(
     call_user_func(function (array $a): array {
         asort($a);
         return $a;
@@ -1253,16 +1264,7 @@ $urlTester = 1 < $argc ? UrlTestCommand::newUrlTesterFromCommand($argv) : new Ur
             ->includeName('*.js')
             ->find()
     ))),
-    array_merge_recursive(UrlTester::getDefaultExclusionTests(), [
-        'fragment' => [
-            function (string $url, string $file = null): bool {
-                if ('reveal.js.md' === $file) {
-                    return 0 === strpos($url, '#') || 0 === strpos($url, "$file#");
-                }
-                return false;
-            },
-        ],
-    ])
+    $exclusionTests
 );
 
 $usageTestSuccess = $urlTester->testUsages(/** /300, true, UrlTester::VERBOSITY_LOUD/**/);
