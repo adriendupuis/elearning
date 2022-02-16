@@ -91,7 +91,7 @@ class Gift {
             if (this.options.parseOnlyStandardComment) {
                 cleanedLine = line.replace(/^\/\/.*$/, '').trim();
             } else {
-                cleanedLine = line.replace(/(?<!https?:)\/\/.*$/, '').trim();
+                cleanedLine = line.replace(/(?<!https?\\?:)\/\/.*$/, '').trim();
             }
             if (!cleanedLine.length) {
                 continue;
