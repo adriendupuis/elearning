@@ -8,7 +8,7 @@ POCs and tools about self producing eLearning contents through standards.
   - scorm.all.sh: Create all DEMO SCOs by just running `./scorm.all.sh;`.
 * cmi5.sh: Zip a set of resources into a cmi5 package (AU).
   - cmi5.all.sh: Create all DEMO AUs by just running `./cmi5.all.sh;`.
-* scorm.reveal.js: Connect a reveal.js presentation to an LMS through SCORM API.
+* reveal.scorm.js: Connect a reveal.js presentation to an LMS through SCORM API.
 * reveal.cmi5.js: Connect a reveal.js presentation to an LMS through cmi5 and xAPI.
 * gift.js: Parse a GIFT file, display its test using reveal.js, submit to LMS using SCORM API or cmi5 xAPI.
   - jqueryui.*.*: JS and base CSS to display and animate some question type(s).

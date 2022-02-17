@@ -1233,7 +1233,7 @@ class UrlTestCommand
 $exclusionTests = array_merge_recursive(UrlTester::getDefaultExclusionTests(), [
     'fragment' => [
         function (string $url, string $file = null): bool {
-            if ('reveal.js.md' === $file) {
+            if ('reveal.md' === $file) {
                 return 0 === strpos($url, '#') || 0 === strpos($url, "$file#");
             }
             return false;
