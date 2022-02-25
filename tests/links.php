@@ -354,7 +354,7 @@ class UrlExtractor
     public function extract(string $file): array
     {
         //var_dump($this->getGrepCommand($file));
-        $grepOutput = trim(shell_exec($this->getGrepCommand($file)));
+        $grepOutput = trim(shell_exec($this->getGrepCommand($file)) ?? '');
         if (empty($grepOutput)) {
             return [];
         }
