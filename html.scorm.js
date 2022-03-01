@@ -3,10 +3,13 @@ $(function () {
     $(document).scroll(function () {
         let scrollTop = $(this).scrollTop();
         let anchor = null;
-        $('a[name]').each(function () {
+        $('*[id], a[name]').each(function () {
             console.log(scrollTop, $(this).offset(), $(this).position());
             if ($(this).offset().top - scrollTop <= threshold) {
-                anchor = $(this).attr('name');
+                anchor = $(this).attr('id');
+                if ('undefined' === typeof anchor) {
+                    anchor = $(this).attr('name');
+                }
             }
         });
         if (anchor) {
