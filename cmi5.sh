@@ -18,7 +18,8 @@ releaseDir='./release';
 outputFile="$releaseDir/$outputFile";
 
 
-# Config and arguments checking
+# Checks
+
 if [ -e $packageRoot ]; then
   echo "Error: $packageRoot already exists.";
   exit 1;
@@ -33,6 +34,17 @@ if [ -e $outputFile ]; then
 fi;
 
 
+# Framework
+
+function sedi() {
+  if [ 'Darwin' == `uname` ]; then
+    sed -i '' "$1" "$2";
+  else
+    sed -i "$1" "$2";
+  fi;
+}
+
+
 # Resources
 
 cp $indexFile $packageRoot/$packageResourcesDir/;
@@ -45,7 +57,7 @@ done;
 
 ## cmi5.xml
 curl --output $packageRoot/cmi5.xml "https://raw.githubusercontent.com/adlnet/cmi5-Client-Library/master/Examples/cmi5.xml";
-sed -i '' "s@<url>AUExample1.html</url>@<url>$packageResourcesDir/$indexFile</url>@" $packageRoot/cmi5.xml;
+sedi "s@<url>AUExample1.html</url>@<url>$packageResourcesDir/$indexFile</url>@" $packageRoot/cmi5.xml;
 
 ## Resource declarations
 files='';
