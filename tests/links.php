@@ -94,7 +94,8 @@ class TestableUrl
 
     public static function solveRelativePath($sourcePath, $targetPath)
     {
-        $targetPath = preg_replace('@(^|/)\./@', '$1', $targetPath);
+        $targetPath = preg_replace('@^\./@', '', $targetPath);
+        $targetPath = preg_replace('@/\./@', '/', $targetPath);
 
         $sourcePathInfo = pathinfo($sourcePath);
         if ('.' !== $sourcePathInfo['dirname']) {
