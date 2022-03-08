@@ -458,7 +458,7 @@ class UrlExtractor
                 self::getHtmlTagPattern('img', 'src'),
             ],
             'md' => [
-                '\[(?P<text>[^\[]*)\]\((?P<url>[^ )]*)\)',
+                '\[(?P<text>[^[]*)\]\((?P<url>[^ )]*)\)',
                 self::getHtmlTagPattern('img', 'src'),
                 self::getHtmlTagPattern('a', 'href', true),//TODO: shouldn't be there
                 'txt',
