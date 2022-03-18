@@ -37,7 +37,7 @@ class ScormGift extends GiftPlugin {
                         errorMessage = 'Test as already been attempted and can not be reviewed.';
                         break;
                     case 'incomplete':
-                    //TODO: Test can't be suspended. What to do is test as been interrupted? If the browser window just has been reloaded?
+                    //TODO: Test can't be suspended. What to do if test has been interrupted? If the browser window just has been reloaded?
                     case 'browsed':
                     case 'not attempted':
                     default:
