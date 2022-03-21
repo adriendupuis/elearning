@@ -13,7 +13,7 @@ class Gift {
             slideSelector: '.reveal > .slides > section',
             questionSlideClass: 'test',
             questionSlideSelector: null,
-            testSubmitButton: 'section button',
+            testSubmitButtonSelector: 'section button',
             testTime: null,
             timerContainer: '.timer',
             timerWarningRatio: 1 / 6,
@@ -205,7 +205,7 @@ class Gift {
         $('[type="radio"], [type="checkbox"]').click(function () {
             $(this).blur();
         })
-        $(this.options.testSubmitButton).click(function (event) {
+        $(this.options.testSubmitButtonSelector).click(function (event) {
             event.preventDefault();
             this.submit();
         }.bind(this));
@@ -269,7 +269,7 @@ class Gift {
     }
 
     submit(exit = this.options.Plugin.constructor.normalExit) {
-        $(this.options.testSubmitButton).hide();
+        $(this.options.testSubmitButtonSelector).hide();
         if (exit !== this.options.Plugin.constructor.normalExit) {
             let indices = this.options.Reveal.getIndices(this.getSubmitSlide()[0]);
             this.options.Reveal.slide(indices.h, indices.v);
@@ -311,17 +311,17 @@ class Gift {
                 timeStr = secondsStr;
             }
             feedback = 'Time Out<br>' + timeStr + ' allotted time has elapsed';
-            $('<div class="feedback timeout">').html(feedback).insertAfter(this.options.testSubmitButton);
+            $('<div class="feedback timeout">').html(feedback).insertAfter(this.options.testSubmitButtonSelector);
         }
         feedback = scorePercent + '% ' + (passed ? '≥' : '<') + ' ' + configScores.percent + '<br>' + (passed ? 'Passed' : 'Failed');
-        $('<div class="feedback ' + (passed ? 'passed' : 'failed') + '">').html(feedback).insertAfter(this.options.testSubmitButton);
-        //$(this.options.testSubmitButton).remove();
+        $('<div class="feedback ' + (passed ? 'passed' : 'failed') + '">').html(feedback).insertAfter(this.options.testSubmitButtonSelector);
+        //$(this.options.testSubmitButtonSelector).remove();
 
         return this;
     }
 
     getSubmitButton() {
-        return $(this.options.testSubmitButton);
+        return $(this.options.testSubmitButtonSelector);
     }
 
     getSubmitSlide() {
