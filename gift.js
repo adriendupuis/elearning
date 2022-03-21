@@ -205,7 +205,7 @@ class Gift {
         $('[type="radio"], [type="checkbox"]').click(function () {
             $(this).blur();
         })
-        $('button').click(function (event) {
+        $(this.options.testSubmitButton).click(function (event) {
             event.preventDefault();
             this.submit();
         }.bind(this));
