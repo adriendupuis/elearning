@@ -115,7 +115,7 @@ class Gift {
                     currentQuestionCode += "\n" + cleanedLine;
                     continue;
                 }
-                let question = GiftQuestion.parse(currentQuestionCode);
+                let question = GiftQuestion.parse(currentQuestionCode, this.options.debug);
                 question.setIndex(questionPool.length);
                 //TODO: create ID from title when cmi5
                 if ('undefined' !== typeof ScormUtils && question.getTitle() && !question.getId()) {
@@ -531,7 +531,7 @@ class Question {
 }
 
 class GiftQuestion {
-    static parse(code) {
+    static parse(code, debug = false) {
         let titleRegExp = /::([^:]+)::\n?/;
 
         let openingBracketIndex = GiftQuestion.indexOfSpecialCharacter(code, '{');
@@ -562,8 +562,8 @@ class GiftQuestion {
         if (-1 < responsesCode.indexOf(' -> ')) {
             for (const part of responseParts) {
                 if (GiftQuestion.inArray(part, ['=', '~'])) {
-                    if ('~' === part) {
-                        this.log('parse error: there is no wrong response in matching question type.')
+                    if (debug && '~' === part) {
+                        console.log('parse error: there is no wrong response in matching question type.')
                     }
                     continue;
                 }
@@ -588,8 +588,8 @@ class GiftQuestion {
                 isCorrectResponse = '=' === part;
                 continue;
             }
-            if (null === isCorrectResponse) {
-                this.log('parse error: response is not correct nor wrong');
+            if (debug && null === isCorrectResponse) {
+                console.log('parse error: response is not correct nor wrong');
             }
             responses.push({
                 isCorrect: isCorrectResponse,
