@@ -56,10 +56,7 @@ class Cmi5Gift extends GiftPlugin {
         this.cmi5Plugin.captureInteractions(interactionList);
         let userScoreObj = {
             scaled: test.score,
-            //raw: test.score,
-            //min: 0,
-            //max: 1
-            raw: Math.max(0, Math.min(100 * test.score, 100)),
+            raw: Math.max(0, Math.min(Math.round(100 * test.score), 100)),
             min: 0,
             max: 100
         };
