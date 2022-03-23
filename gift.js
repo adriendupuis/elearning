@@ -91,10 +91,15 @@ class Gift {
             if (this.options.parseOnlyStandardComment) {
                 cleanedLine = line.replace(/^\/\/.*$/, '').trim();
             } else {
-                // cleanedLine = line.replace(/(?<!https?\\?:)\/\/.*$/, '').trim(); // Safari and Firefox doesn't support lookbehind syntax.
-                if (line.lastIndexOf('http://') + 'http:'.length !== line.lastIndexOf('//')
-                    && line.lastIndexOf('https://') + 'https:'.length !== line.lastIndexOf('//')) {
-                    cleanedLine = line.replace(/\/\/.*$/, '').trim();
+                //cleanedLine = line.replace(/(?<!https?\\?:)\/\/.*$/, '').trim(); // Safari and Firefox doesn't support lookbehind syntax.
+                if (
+                    -1 < line.lastIndexOf('//')
+                    && line.lastIndexOf('http://') + 'http:'.length !== line.lastIndexOf('//')
+                    && line.lastIndexOf('http\\://') + 'http\\:'.length !== line.lastIndexOf('//')
+                    && line.lastIndexOf('https://') + 'https:'.length !== line.lastIndexOf('//')
+                    && line.lastIndexOf('https\\://') + 'https\\:'.length !== line.lastIndexOf('//')
+                ) {
+                    cleanedLine = line.substring(0, line.lastIndexOf('//')).trim();
                 }
             }
             if (!cleanedLine.length) {
@@ -558,7 +563,16 @@ class GiftQuestion {
         }
 
         /* Multiple response elements question types */
-        let responseParts = responsesCode.split(/((?<!\\)[~=])/);
+        //let responseParts = responsesCode.split(/((?<!\\)[~=])/); // Safari and Firefox doesn't support lookbehind syntax.
+        let responseParts = [], tmpResponseParts = responsesCode.split(/(\\?[~=])/);
+        for (let index=0; index<tmpResponseParts.length; index++) {
+            if (GiftQuestion.inArray(tmpResponseParts[index], ['\\=', '\\~'])) {
+                responseParts[responseParts.length-1] += tmpResponseParts[index]+tmpResponseParts[index+1];
+                index++;
+            } else {
+                responseParts.push(tmpResponseParts[index]);
+            }
+        }
         responseParts.shift();
         let responses = [];
 
