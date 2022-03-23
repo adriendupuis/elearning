@@ -91,7 +91,11 @@ class Gift {
             if (this.options.parseOnlyStandardComment) {
                 cleanedLine = line.replace(/^\/\/.*$/, '').trim();
             } else {
-                cleanedLine = line.replace(/(?<!https?\\?:)\/\/.*$/, '').trim();
+                // cleanedLine = line.replace(/(?<!https?\\?:)\/\/.*$/, '').trim(); // Safari and Firefox doesn't support lookbehind syntax.
+                if (line.lastIndexOf('http://') + 'http:'.length !== line.lastIndexOf('//')
+                    && line.lastIndexOf('https://') + 'https:'.length !== line.lastIndexOf('//')) {
+                    cleanedLine = line.replace(/\/\/.*$/, '').trim();
+                }
             }
             if (!cleanedLine.length) {
                 continue;
