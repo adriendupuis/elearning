@@ -166,7 +166,7 @@ class TestableUrl
     public const NOT_TESTABLE_CODE = 999;
 
     /** @param null|bool $external */
-    public static function testUrl(string $url, bool $external = null, $testFragment = true): array
+    public static function testUrl(string $url, bool $external = null, $testFragment = true, int $retryLimit = 1, int $retryDelay = 2, int $retryCount = 0): array
     {
         $headers = null;
         $code = self::NOT_TESTABLE_CODE;
@@ -219,6 +219,11 @@ class TestableUrl
                     }
                 }
                 break;
+            case 429: // Too Many Requests
+                if ($retryCount <= $retryLimit) {
+                    sleep($retryDelay);
+                    return self::testUrl($url, $external, $testFragment, $retryLimit, $retryDelay, $retryCount + 1);
+                }
             case 400: // Bad Request
             case 401: // Unauthorized
             case 403: // Forbidden
