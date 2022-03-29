@@ -11,7 +11,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - run: |
+      - name: 'Compile and attach releases'
+        run: |
           set -x
           tag_name=${GITHUB_REF##*/}
           bash cmi5.all.sh
