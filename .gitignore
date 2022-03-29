@@ -1,0 +1,4 @@
+package.tmp/
+scorm.package.template.tmp.zip
+release/*.zip
+*.encoded.*
