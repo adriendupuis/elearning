@@ -28,6 +28,7 @@ POCs and tools about self producing eLearning contents through standards.
 
 * UI:
   - Slides: _[reveal.js](https://revealjs.com/)_ [by @hakimel under MIT License](https://github.com/hakimel/reveal.js/blob/master/LICENSE)
+  - Markdown: [Marked](https://marked.js.org/) [under MIT license](https://marked.js.org/license)
   - Other: [jQuery](https://jquery.com/) and [jQuery UI](https://jqueryui.com/) [under MIT License](https://jquery.org/license/)
 * SCORM:
   - _SCORM API Wrapper_ [by Philip Hutchison under MIT-style License](https://github.com/pipwerks/scorm-api-wrapper)
